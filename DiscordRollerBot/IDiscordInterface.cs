@@ -51,7 +51,10 @@ namespace DiscordRollerBot
 
         private async Task HandleMessage(DiscordClient sender, MessageCreateEventArgs e)
         {
-            _logger.LogInformation(e.Message.Content);
+            if (e.Author.IsCurrent)
+                return;
+            
+            _logger.LogInformation($"[{e.Message.MessageType}] ({e.Author}) {e.Message.Content}");
             
             var content = e.Message.Content.Trim();
             var tokens = content.Split(' ', StringSplitOptions.None);
@@ -67,10 +70,10 @@ namespace DiscordRollerBot
                     try
                     {
                         var result = _evaluator.Evaluate(instructions);
-                        response = result.Value + " Reason: " + result.Breakdown;
+                        response = "NewRoller: " + result.Value + " Reason: " + result.Breakdown;
                     } catch (InvalidOperationException iex)
                     {
-                        response = iex.Message;
+                        response = "NewRoller: " + iex.Message;
                     }
                 }
 
