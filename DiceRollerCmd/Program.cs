@@ -1,51 +1,44 @@
 ﻿using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using DiceRoller.Dice;
 using DiceRoller.Parser;
 using DiscordRollerBot;
 using DSharpPlus;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace DiceRollerCmd
 {
     class Program
     {
-        static void Main(string[] args)
+        static IServiceCollection _services;
+        
+        static async Task Main(string[] args)
         {
-            var config = new DiscordConfiguration()
-            {
-                Token = "ODI2OTAxMTg0ODY1NzYzMzU4.YGTNvQ.N6EnSvR9VXIXVaQEtsIJyIlLgXI", 
-                TokenType = TokenType.Bot,
-                Intents = DiscordIntents.AllUnprivileged
-            };
+            using IHost host = Host
+                                .CreateDefaultBuilder()
+                                .ConfigureHostConfiguration(configHost =>
+                                {
+                                    configHost.SetBasePath(Directory.GetCurrentDirectory());
+                                    configHost.AddJsonFile("appsettings.json", optional: false);
+                                    configHost.AddCommandLine(args);
+                                })
+                                .ConfigureServices(ConfigureServices)
+                                .ConfigureLogging(logging => {
+                                    logging.AddConsole().SetMinimumLevel(LogLevel.Information);
+                                })
+                                .Build();
 
-            var client = new DiscordClient(config);
 
-            var lf = LoggerFactory.Create(logging => logging.AddConsole());
-            
-            var logger = lf.CreateLogger<Program>();
-            logger.LogError("Test");
 
-            var botLogger = lf.CreateLogger<DiscordInterface>();
+            await host.RunAsync();
 
-            var botConfig = new DiscordInterfaceConfiguration()
-            {
-                CommandPrefix = "!roll"
-            };
+            //var input = Console.ReadLine();
 
-            var bot = new DiscordInterface(client, botConfig, new Evaluator(new RandomNumberGenerator()), botLogger);
-
-            try
-            {
-                bot.Start();
-
-                var input = Console.ReadLine();
-            } finally
-            {
-                bot.Stop();
-            }
-
-            
 
             // Console.WriteLine("eg. (3d10 + 5) / 2 + 1d2!");
             // Console.WriteLine();
@@ -71,6 +64,54 @@ namespace DiceRollerCmd
             //         Console.WriteLine();
             //     }
             // }
+        }
+
+        private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+        {
+            _services = services;
+
+            var botConfig = new DiscordInterfaceConfiguration();
+            context.Configuration.Bind("BotConfig", botConfig);
+            services.AddSingleton(botConfig);
+
+            var config = new DiscordConfiguration()
+            {
+                Token =  botConfig.Token,
+                TokenType = TokenType.Bot,
+                Intents = DiscordIntents.AllUnprivileged
+            };            
+            services.AddSingleton(config);
+
+            services.AddSingleton<DiscordClient, DiscordClient>();
+
+            services.AddSingleton<IDiscordInterface, DiscordInterface>();
+
+            services.AddSingleton<IRandomNumberGenerator, RandomNumberGenerator>();
+            services.AddSingleton<Evaluator, Evaluator>();
+
+            services.AddHostedService<ConsoleHost>();
+        }
+    }
+
+    public class ConsoleHost : IHostedService
+    {
+        private readonly ILogger<ConsoleHost> _logger;
+        private readonly IDiscordInterface _discordInterface;
+
+        public ConsoleHost(ILogger<ConsoleHost> logger, IHostApplicationLifetime appLifetime, IDiscordInterface discord)
+        {
+            _logger = logger;
+            _discordInterface = discord;
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            await _discordInterface.Start();
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await _discordInterface.Stop();
         }
     }
 }
