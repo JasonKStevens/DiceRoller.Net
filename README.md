@@ -25,4 +25,11 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 
 > (3d10 + 5) / 2 + 1d2!
 14.5 Reason: [9, 4, 5] + 5 / 2 + [2!, 1]
+
+> 3d10 < 55
+2 successes Reason: [45, 87, 22]
+
+> 3d10 > 55
+1 successes Reason: [45, 87, 22]
+
 </pre>
