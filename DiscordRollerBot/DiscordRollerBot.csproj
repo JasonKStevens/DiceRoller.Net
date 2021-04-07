@@ -11,5 +11,4 @@
   <ItemGroup>
     <ProjectReference Include="..\DiceRoller\DiceRoller.csproj" />
   </ItemGroup>
-
 </Project>

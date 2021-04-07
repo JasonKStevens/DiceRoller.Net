@@ -32,4 +32,7 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 > 3d10 > 55
 1 successes Reason: [45, 87, 22]
 
+> min(d10-4,1) + 5
+6 Reason: [2]-4 = -2, min 1 => 1 + 5
+
 </pre>
