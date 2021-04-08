@@ -25,9 +25,10 @@ namespace DiceRoller.Parser
             var roll = new NonTerminal("roll");
             var dice = new NonTerminal("dice");
             var min = new NonTerminal("min");
+            var repeat = new NonTerminal("repeat");
 
             // Rules
-            expression.Rule = number | brackets | add | subtract | multiply | divide | min | roll | comment;
+            expression.Rule = number | brackets | add | subtract | multiply | divide | min | roll | comment | repeat;
             brackets.Rule = "(" + expression + ")";
             add.Rule = expression + "+" + expression;
             subtract.Rule = expression + "-" + expression;
@@ -35,11 +36,13 @@ namespace DiceRoller.Parser
             divide.Rule = expression + "/" + expression;
             roll.Rule = dice + number + "!" | dice + number | number + dice + number | number + dice + number + "!";
             dice.Rule = new KeyTerm("d", "d") { AllowAlphaAfterKeyword = true };  // Avoid having to add whitespace either side of "d"
+            repeat.Rule = new KeyTerm("repeat", "repeat") + "(" + expression + "," + number + ")";
 
-//            min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";
-            min.Rule = expression + new KeyTerm("min", "min") + number;
+            min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";
+//            min.Rule = expression + new KeyTerm("min", "min") + number;
 
             RegisterOperators(05, "min");
+            RegisterOperators(08, "repeat");
             RegisterOperators(10, "+", "-");
             RegisterOperators(30, "*", "/");
             RegisterOperators(40, "d");

@@ -37,7 +37,10 @@ namespace DiceRoller.Parser
                     return EvaluateOperation(node, (l, r) => l / r, "/");
 
                 case "min":
-                    return EvaluateOperation(node, (l, r) => (l < r) ? r : l, "min");
+                    return EvaluateFuncOperation(node, (l, r) => (l < r) ? r : l, "min");
+
+                case "repeat":
+                    return EvaluateRepeatOperation(node);
 
                 case "roll":
                     return EvaluateDiceExpression(node);
@@ -81,6 +84,33 @@ namespace DiceRoller.Parser
 
             var value = operation(leftNode.Value, rightNode.Value);
             return new ResultNode(value, $"{leftNode.Breakdown} {symbol} {rightNode.Breakdown}");
+        }
+
+        private ResultNode EvaluateRepeatOperation(ParseTreeNode node)
+        {
+            var leftNode = node.ChildNodes[1];
+            var count = Visit(node.ChildNodes[3]).Value;
+
+            var breakdown = new List<string>();
+            float total = 0;
+            for (int i = 0; i < count; i++)
+            {
+                var result = Visit(leftNode);
+                breakdown.Add(result.Breakdown);
+                total += result.Value;
+            }
+
+            return new ResultNode(total, String.Join(", ", breakdown.ToArray()));
+        }
+
+        private ResultNode EvaluateFuncOperation(ParseTreeNode node, Func<float, float, float> operation, string symbol)
+        {
+            var leftNode = Visit(node.ChildNodes[1]);
+            var rightNode = Visit(node.ChildNodes[3]);
+
+            var value = operation(leftNode.Value, rightNode.Value);
+            
+            return new ResultNode(value, $"{symbol}({leftNode.Breakdown}, {rightNode.Breakdown})");
         }
 
         private (ResultNode left, ResultNode right) GetBinaryNodes(ParseTreeNode node)
