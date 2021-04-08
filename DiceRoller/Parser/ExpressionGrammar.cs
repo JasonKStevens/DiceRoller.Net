@@ -24,20 +24,25 @@ namespace DiceRoller.Parser
             var divide = new NonTerminal("divide");
             var roll = new NonTerminal("roll");
             var dice = new NonTerminal("dice");
+            var min = new NonTerminal("min");
 
             // Rules
-            expression.Rule = number | brackets | add | subtract | multiply | divide | roll | comment;
+            expression.Rule = number | brackets | add | subtract | multiply | divide | min | roll | comment;
             brackets.Rule = "(" + expression + ")";
             add.Rule = expression + "+" + expression;
             subtract.Rule = expression + "-" + expression;
             multiply.Rule = expression + "*" + expression;
             divide.Rule = expression + "/" + expression;
-            roll.Rule = dice + number | number + dice + number | number + dice + number + "!";
+            roll.Rule = dice + number + "!" | dice + number | number + dice + number | number + dice + number + "!";
             dice.Rule = new KeyTerm("d", "d") { AllowAlphaAfterKeyword = true };  // Avoid having to add whitespace either side of "d"
 
+//            min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";
+            min.Rule = expression + new KeyTerm("min", "min") + number;
+
+            RegisterOperators(05, "min");
             RegisterOperators(10, "+", "-");
-            RegisterOperators(20, "*", "/");
-            RegisterOperators(30, "d");
+            RegisterOperators(30, "*", "/");
+            RegisterOperators(40, "d");
 
             NonGrammarTerminals.Add(comment);
             RegisterBracePair("(", ")");

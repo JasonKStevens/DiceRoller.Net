@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DiceRoller.Dice;
@@ -7,6 +8,7 @@ using DiceRoller.Parser;
 using DiscordRollerBot;
 using DSharpPlus;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,15 +27,12 @@ namespace DiceRollerCmd
                                 {
                                     configHost.SetBasePath(Directory.GetCurrentDirectory());
                                     configHost.AddJsonFile("appsettings.json", optional: false);
-                                    configHost.AddCommandLine(args);
                                 })
-                                .ConfigureServices(ConfigureServices)
                                 .ConfigureLogging(logging => {
                                     logging.AddConsole().SetMinimumLevel(LogLevel.Information);
                                 })
+                                .ConfigureServices(ConfigureServices)
                                 .Build();
-
-
 
             await host.RunAsync();
 

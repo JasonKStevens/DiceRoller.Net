@@ -7,6 +7,21 @@ namespace DiceRoller.Test
     public class ExplodingDiceFixture
     {
         [Test]
+        public void Exploding_SingleDice_SingleExplosion_NoInitialNumber()
+        {
+            // Arrange
+            var sequenceGenerator = DiceHelper.GetSequenceGenerator(2, 1);
+            var evaluator = new Evaluator(sequenceGenerator);
+
+            // Act
+            var evaluation = evaluator.Evaluate("d2!");
+
+            // Assert
+            Assert.That(evaluation.Value, Is.EqualTo(3));
+            Assert.That(evaluation.Breakdown, Is.EqualTo("[2!, 1]"));
+        }
+
+        [Test]
         public void Exploding_SingleDice_SingleExplosion()
         {
             // Arrange

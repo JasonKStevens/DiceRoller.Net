@@ -36,6 +36,9 @@ namespace DiceRoller.Parser
                 case "divide":
                     return EvaluateOperation(node, (l, r) => l / r, "/");
 
+                case "min":
+                    return EvaluateOperation(node, (l, r) => (l < r) ? r : l, "min");
+
                 case "roll":
                     return EvaluateDiceExpression(node);
             }

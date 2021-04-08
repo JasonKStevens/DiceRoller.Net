@@ -84,5 +84,6 @@ namespace DiceRoller.Test
             Assert.That(evaluation.Value, Is.EqualTo(1000));
             Assert.That(evaluation.Breakdown, Is.EqualTo("[700, 300]"));
         }
+
     }
 }
