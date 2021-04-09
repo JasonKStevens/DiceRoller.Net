@@ -18,5 +18,16 @@ namespace DiceRoller.Test.Helpers
 
             return randomNumberGeneratorMock.Object;
         }
+
+        public static IRandomNumberGenerator GetMoqGeneratorForStaticResult(int alwaysReturn)
+        {
+            var randomNumberGeneratorMock = new Mock<IRandomNumberGenerator>();
+            var setup = randomNumberGeneratorMock
+                .Setup(x => x.Next(It.IsAny<int>()))
+                .Returns(alwaysReturn);
+
+            return randomNumberGeneratorMock.Object;
+        }
+
     }
 }

@@ -5,6 +5,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordRollerBot
@@ -68,8 +69,17 @@ namespace DiscordRollerBot
                     try
                     {
                         var result = _evaluator.Evaluate(instructions);
-                        
-                        response = name + " Roll: __**"  + result.Value + "**__ Reason: `" + result.Breakdown + "`";
+
+                        var builder = new StringBuilder();
+                        builder.Append(name + " Roll:   __**"  + result.Value + "**__  ");
+                        if (result.Breakdown.Length > 50)
+                            builder.AppendLine();
+                        builder.Append("Reason:  ");
+                        if (result.Breakdown.Length > 50)
+                            builder.AppendLine();
+                        builder.AppendLine(result.Breakdown);
+
+                        response = builder.ToString();
                     } catch (InvalidOperationException iex)
                     {
                         response = name + ": " + iex.Message;
