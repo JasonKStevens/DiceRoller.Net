@@ -11,6 +11,9 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 | 3d6!                       | Exploding dice         |
 | (3d10 + 5) * d7 / 2 - 1d2! | Combo                  |
 | 1d6+8 # Orc's Damage       | Comments               |
+| min(d10-4,1)               | Minimum roll outcome   |
+| repeat(d10, 5)             | Repeat rolls           |
+
 
 ## REPL
 <pre>
@@ -39,3 +42,7 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 24 Readon: [1] [2] [6] [1] [9] [5]
 
 </pre>
+
+## TODO
+
+* Decouple message handling from the DiscordInterface, register a prefix and handler and the define it all outside
