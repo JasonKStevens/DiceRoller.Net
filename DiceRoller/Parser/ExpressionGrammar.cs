@@ -33,7 +33,7 @@ namespace DiceRoller.Parser
             subtract.Rule = expression + "-" + expression;
             multiply.Rule = expression + "*" + expression;
             divide.Rule = expression + "/" + expression;
-            roll.Rule = dice + number + "!" | dice + number | number + dice + number | number + dice + number + "!";
+            roll.Rule = dice + number | number + dice + number | dice + number + "!" | number + dice + number + "!";
             dice.Rule = new KeyTerm("d", "d") { AllowAlphaAfterKeyword = true };  // Avoid having to add whitespace either side of "d"
 
 //            min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";

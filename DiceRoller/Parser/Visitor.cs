@@ -48,13 +48,12 @@ namespace DiceRoller.Parser
 
         private ResultNode EvaluateDiceExpression(ParseTreeNode node)
         {
-            (var leftNode, var rightNode) = GetBinaryNodes(node);
+            (var leftNode, var rightNode) = GetDiceNodes(node);
 
             var count = (int) (leftNode?.Value ?? 1);
             var dice = (int) rightNode.Value;
 
-            var postfix = node.ChildNodes.Count > 3 ? node.ChildNodes[3].Token.Text : null;
-            var isExploding = postfix == "!";
+            var isExploding = node.ChildNodes.Last()?.Token?.Text == "!";
             const int maxExplodingCount = 10;
 
             var roll = Enumerable.Range(0, count)
@@ -93,14 +92,14 @@ namespace DiceRoller.Parser
             return (leftNode, rightNode);
         }
 
-        private (TLeft left, TRight right) GetBinaryValues<TLeft, TRight>(ParseTreeNode node)
+        private (ResultNode left, ResultNode right) GetDiceNodes(ParseTreeNode node)
         {
-            (var leftNode, var rightNode) = GetBinaryNodes(node);
+            var isUnary = node.ChildNodes[0].ToString() == "dice";
 
-            var leftValue = leftNode == null ? default : (TLeft) Convert.ChangeType(leftNode?.Value, typeof(TLeft));
-            var rightValue = rightNode == null ? default : (TRight) Convert.ChangeType(rightNode?.Value, typeof(TRight));
+            var leftNode = isUnary ? null : Visit(node.ChildNodes[0]);
+            var rightNode = isUnary ? Visit(node.ChildNodes[1]) : Visit(node.ChildNodes[2]);
 
-            return (leftValue, rightValue);
+            return (leftNode, rightNode);
         }
     }
 }
