@@ -39,10 +39,8 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 6 Reason: [2]-4 = -2, min 1 => 1 + 5
 
 > repeat(d10,6)
-24 Readon: [1] [2] [6] [1] [9] [5]
+24 Reason: [1] [2] [6] [1] [9] [5]
 
 </pre>
 
 ## TODO
-
-* Decouple message handling from the DiscordInterface, register a prefix and handler and the define it all outside
