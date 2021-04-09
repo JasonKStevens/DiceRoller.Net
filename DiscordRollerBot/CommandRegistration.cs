@@ -6,9 +6,9 @@ namespace DiscordRollerBot
     public class CommandRegistration
     {
         public string CommandPrefix;
-        public Func<string, MessageCreateEventArgs, string> Handler;
+        public Func<string, string> Handler;
 
-        public CommandRegistration(string commandPrefix, Func<string, MessageCreateEventArgs, string> handler)
+        public CommandRegistration(string commandPrefix, Func<string, string> handler)
         {
             CommandPrefix = commandPrefix;
             Handler = handler;
@@ -21,11 +21,11 @@ namespace DiscordRollerBot
         }
 
 
-        public (bool, string) Handle(string commandPrefix, string instructions, MessageCreateEventArgs e)
+        public (bool, string) Handle(string commandPrefix, string instructions)
         {
             if (CommandPrefix.Equals(commandPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return (true, Handler(instructions, e));
+                return (true, Handler(instructions));
             }
 
             return (false, null);

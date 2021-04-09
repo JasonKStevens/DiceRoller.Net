@@ -109,31 +109,20 @@ namespace DiceRollerCmd
             _discordInterface.AddHandler("!roll", HandleDiceRolls);
         }
 
-        private string HandleDiceRolls(string instructions, MessageCreateEventArgs e)
+        private string HandleDiceRolls(string instructions)
         {
-            string name = e.Author.Username;
-            DiscordMember discordMember = (e.Author as DiscordMember);
-            if (discordMember != null)
-                name = discordMember.DisplayName;
+            var result = _evaluator.Evaluate(instructions);
 
-            try
-            {
-                var result = _evaluator.Evaluate(instructions);
+            var builder = new StringBuilder();
+            builder.Append("   __**"  + result.Value + "**__  ");
+            if (result.Breakdown.Length > 50)
+                builder.AppendLine();
+            builder.Append("Reason:  ");
+            if (result.Breakdown.Length > 50)
+                builder.AppendLine();
+            builder.AppendLine(result.Breakdown);
 
-                var builder = new StringBuilder();
-                builder.Append(name + " Roll:   __**"  + result.Value + "**__  ");
-                if (result.Breakdown.Length > 50)
-                    builder.AppendLine();
-                builder.Append("Reason:  ");
-                if (result.Breakdown.Length > 50)
-                    builder.AppendLine();
-                builder.AppendLine(result.Breakdown);
-
-                return builder.ToString();
-            } catch (InvalidOperationException iex)
-            {
-                return name + ": " + iex.Message;
-            }
+            return builder.ToString();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

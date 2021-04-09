@@ -12,7 +12,7 @@ namespace DiscordRollerBot
 
         DiscordInterfaceStatus State {get; }
 
-        void AddHandler(string commandPrefix, Func<string, MessageCreateEventArgs, string> handler);
+        void AddHandler(string commandPrefix, Func<string, string> handler);
 
     }
 }

@@ -27,7 +27,7 @@ namespace DiscordRollerBot
 
         public DiscordInterfaceStatus State { get; private set; }
 
-        public void AddHandler(string commandPrefix, Func<string, MessageCreateEventArgs, string> handler)
+        public void AddHandler(string commandPrefix, Func<string, string> handler)
         {
             _commandHandlers.Add(new CommandRegistration(commandPrefix, handler));
         }
@@ -63,16 +63,35 @@ namespace DiscordRollerBot
                 var instructions = String.Join(' ', tokens, 1, tokens.Length-1);
                 bool handled = false;
 
+                string name = e.Author.Username;
+                DiscordMember discordMember = (e.Author as DiscordMember);
+                if (discordMember != null)
+                    name = discordMember.DisplayName;
+
+
+
                 foreach (var handler in _commandHandlers)
                 {
-                    (handled, response) = handler.Handle(tokens[0], instructions, e);
-                    if (handled) break;
+                    try
+                    {
+                        (handled, response) = handler.Handle(tokens[0], instructions);
+                        if (handled)
+                        {
+                            response = name + " Roll: " + response;
+                            break;
+                        } 
+                    } catch (InvalidOperationException iex)
+                    {
+                        response = name + ": " + iex.Message;
+                        break;
+                    }
                 }
-                
-                if (!handled || response==null)
+
+                if (handled && response==null)
                     response  = "Unrecognised command prefix";
 
                 await e.Message.RespondAsync(response);
+                return;
             }
 
             _logger.LogWarning("Message was not handled");
