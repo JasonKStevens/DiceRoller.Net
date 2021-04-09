@@ -1,12 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DiceRoller.Dice;
 using DiceRoller.Parser;
 using DiscordRollerBot;
 using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
@@ -83,24 +86,54 @@ namespace DiceRollerCmd
 
             services.AddSingleton<DiscordClient, DiscordClient>();
 
-            services.AddSingleton<IDiscordInterface, DiscordInterface>();
+            services.AddSingleton<IDiscordApi, DiscordApi>();
 
             services.AddSingleton<IRandomNumberGenerator, RandomNumberGenerator>();
             services.AddSingleton<Evaluator, Evaluator>();
 
-            services.AddHostedService<ConsoleHost>();
+            services.AddHostedService<BotHost>();
         }
     }
 
-    public class ConsoleHost : IHostedService
+    public class BotHost : IHostedService
     {
-        private readonly ILogger<ConsoleHost> _logger;
-        private readonly IDiscordInterface _discordInterface;
+        private readonly ILogger<BotHost> _logger;
+        private readonly IDiscordApi _discordInterface;
+        private readonly Evaluator _evaluator;
 
-        public ConsoleHost(ILogger<ConsoleHost> logger, IHostApplicationLifetime appLifetime, IDiscordInterface discord)
+        public BotHost(ILogger<BotHost> logger, IHostApplicationLifetime appLifetime, IDiscordApi discord, Evaluator evaluator)
         {
             _logger = logger;
             _discordInterface = discord;
+            _evaluator = evaluator;
+            _discordInterface.AddHandler("!roll", HandleDiceRolls);
+        }
+
+        private string HandleDiceRolls(string instructions, MessageCreateEventArgs e)
+        {
+            string name = e.Author.Username;
+            DiscordMember discordMember = (e.Author as DiscordMember);
+            if (discordMember != null)
+                name = discordMember.DisplayName;
+
+            try
+            {
+                var result = _evaluator.Evaluate(instructions);
+
+                var builder = new StringBuilder();
+                builder.Append(name + " Roll:   __**"  + result.Value + "**__  ");
+                if (result.Breakdown.Length > 50)
+                    builder.AppendLine();
+                builder.Append("Reason:  ");
+                if (result.Breakdown.Length > 50)
+                    builder.AppendLine();
+                builder.AppendLine(result.Breakdown);
+
+                return builder.ToString();
+            } catch (InvalidOperationException iex)
+            {
+                return name + ": " + iex.Message;
+            }
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

@@ -5,27 +5,32 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordRollerBot
 {
-    public class DiscordInterface : IDiscordInterface    
+    public class DiscordApi : IDiscordApi    
     {
         private readonly DiscordClient _client;
         private readonly DiscordInterfaceConfiguration _config;
-        private readonly Evaluator _evaluator;
-        private readonly ILogger<DiscordInterface> _logger;
+        private readonly ILogger<DiscordApi> _logger;
 
-        public DiscordInterface(DiscordClient client, DiscordInterfaceConfiguration config, Evaluator evaluator, ILogger<DiscordInterface> logger = null)
+        private readonly List<CommandRegistration> _commandHandlers = new List<CommandRegistration>();
+        public DiscordApi(DiscordClient client, DiscordInterfaceConfiguration config, ILogger<DiscordApi> logger = null)
         {
             _client = client;
             _config = config;
-            _evaluator = evaluator;
-            _logger = logger ?? NullLogger<DiscordInterface>.Instance;
+            _logger = logger ?? NullLogger<DiscordApi>.Instance;
         }
 
         public DiscordInterfaceStatus State { get; private set; }
+
+        public void AddHandler(string commandPrefix, Func<string, MessageCreateEventArgs, string> handler)
+        {
+            _commandHandlers.Add(new CommandRegistration(commandPrefix, handler));
+        }
 
         public async Task<bool> Start()
         {
@@ -47,7 +52,6 @@ namespace DiscordRollerBot
             if (e.Author.IsCurrent)
                 return;
 
-            
             _logger.LogInformation($"[{e.Message.MessageType}] ({e.Author}) {e.Message.Content}");
             
             var content = e.Message.Content.Trim();
@@ -55,44 +59,26 @@ namespace DiscordRollerBot
 
             if (tokens.Length > 0)
             {
-                string response = "Unrecognised command prefix";
+                string response = null;
+                var instructions = String.Join(' ', tokens, 1, tokens.Length-1);
+                bool handled = false;
 
-                if (tokens[0].ToLower().Contains(_config.CommandPrefix))
+                foreach (var handler in _commandHandlers)
                 {
-                    string name = e.Author.Username;
-                    DiscordMember discordMember = (e.Author as DiscordMember);
-                    if (discordMember != null)
-                        name = discordMember.DisplayName;
-
-                    var instructions = String.Join(' ', tokens, 1, tokens.Length-1);
-
-                    try
-                    {
-                        var result = _evaluator.Evaluate(instructions);
-
-                        var builder = new StringBuilder();
-                        builder.Append(name + " Roll:   __**"  + result.Value + "**__  ");
-                        if (result.Breakdown.Length > 50)
-                            builder.AppendLine();
-                        builder.Append("Reason:  ");
-                        if (result.Breakdown.Length > 50)
-                            builder.AppendLine();
-                        builder.AppendLine(result.Breakdown);
-
-                        response = builder.ToString();
-                    } catch (InvalidOperationException iex)
-                    {
-                        response = name + ": " + iex.Message;
-                    }
+                    (handled, response) = handler.Handle(tokens[0], instructions, e);
+                    if (handled) break;
                 }
+                
+                if (!handled || response==null)
+                    response  = "Unrecognised command prefix";
 
                 await e.Message.RespondAsync(response);
-
-                return;
             }
 
             _logger.LogWarning("Message was not handled");
-        }
+
+            return;
+        } 
 
         public async Task<bool> Stop()
         {
