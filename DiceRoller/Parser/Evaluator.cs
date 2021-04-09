@@ -28,7 +28,15 @@ namespace DiceRoller.Parser
                 throw new InvalidOperationException(message);
             }
 
-            return _visitor.Visit(syntaxTree.Root);
+            var result = _visitor.Visit(syntaxTree.Root);
+
+            var comments = syntaxTree.Tokens.Where(x => x.Terminal is CommentTerminal).FirstOrDefault();
+            if (comments != null)
+            {
+                result = new ResultNode(result.Value, result.Breakdown + " " + comments.Text);
+            }
+
+            return result;
         }
     }
 }

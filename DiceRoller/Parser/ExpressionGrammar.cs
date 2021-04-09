@@ -39,8 +39,9 @@ namespace DiceRoller.Parser
             repeat.Rule = new KeyTerm("repeat", "repeat") + "(" + expression + "," + number + ")";
 
             min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";
-//            min.Rule = expression + new KeyTerm("min", "min") + number;
 
+
+        
             RegisterOperators(05, "min");
             RegisterOperators(08, "repeat");
             RegisterOperators(10, "+", "-");

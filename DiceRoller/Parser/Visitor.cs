@@ -100,7 +100,7 @@ namespace DiceRoller.Parser
                 total += result.Value;
             }
 
-            return new ResultNode(total, String.Join(", ", breakdown.ToArray()));
+            return new ResultNode(total, "(" + String.Join(", ", breakdown.ToArray()) + ")");
         }
 
         private ResultNode EvaluateFuncOperation(ParseTreeNode node, Func<float, float, float> operation, string symbol)
@@ -110,7 +110,7 @@ namespace DiceRoller.Parser
 
             var value = operation(leftNode.Value, rightNode.Value);
             
-            return new ResultNode(value, $"{symbol}({leftNode.Breakdown}, {rightNode.Breakdown})");
+            return new ResultNode(value, $"{symbol}({leftNode.Breakdown}, {rightNode.Breakdown}) => **{value}**");
         }
 
         private (ResultNode left, ResultNode right) GetBinaryNodes(ParseTreeNode node)

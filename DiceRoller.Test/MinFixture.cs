@@ -23,22 +23,19 @@ namespace DiceRoller.Test
             // Assert
             Assert.That(evaluation.Value, Is.EqualTo(expected));
         }
-    }
 
-    public class RepeatFixture
-    {
         [Test]
-        public void RepeatsASimpleRoll()
+        public void sdfst()
         {
             // Arrange
-            var sequenceGenerator = DiceHelper.GetSequenceGenerator(1,2,3,4,5,6,7,8,9,10);
+            var sequenceGenerator = DiceHelper.GetSequenceGenerator(5);
             var evaluator = new Evaluator(sequenceGenerator);
 
             // Act
-            var evaluation = evaluator.Evaluate("repeat(2d10,5)");
+            var evaluation = evaluator.Evaluate("d10 # test comment for testing tests");
 
             // Assert
-            Assert.That(evaluation.Value, Is.EqualTo(55));
-        }
+            Assert.That(evaluation.Value, Is.EqualTo(5));
+        }        
     }
 }
