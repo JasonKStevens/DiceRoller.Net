@@ -46,6 +46,11 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 > repeat(d10,6)
 24 Reason: [1] [2] [6] [1] [9] [5]
 
+> backfire
+32 Reason: The Adept becomes the target of the spell with some or all effects doubled.
+
+> injury
+99 Reason: Crushing blow to your pelvis breaks bone and tears tissue. Take 7 Damage Points immediately to Endurance and fall prone. Make a WP check to avoid falling unconscious. If you survive, you will be unable to move for D10 months.
 </pre>
 
 ## TODO
