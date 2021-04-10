@@ -16,7 +16,10 @@ namespace DiceRoller.Parser
 
         public ResultNode Evaluate(string input)
         {
-            var language = new LanguageData(new ExpressionGrammar());
+            var grammar = new ExpressionGrammar();
+            new GrammarExtensions().Extend(grammar);
+
+            var language = new LanguageData(grammar);
             var parser = new Irony.Parsing.Parser(language);
             var syntaxTree = parser.Parse(input);
 

@@ -29,17 +29,17 @@ namespace DiceRoller.Parser
 
             // Rules
             expression.Rule = number | brackets | add | subtract | multiply | divide | min | roll | comment | repeat;
+            
             brackets.Rule = "(" + expression + ")";
             add.Rule = expression + "+" + expression;
             subtract.Rule = expression + "-" + expression;
             multiply.Rule = expression + "*" + expression;
             divide.Rule = expression + "/" + expression;
+
             roll.Rule = dice + number | number + dice + number | dice + number + "!" | number + dice + number + "!";
             dice.Rule = new KeyTerm("d", "d") { AllowAlphaAfterKeyword = true };  // Avoid having to add whitespace either side of "d"
             repeat.Rule = new KeyTerm("repeat", "repeat") + "(" + expression + "," + number + ")";
-
             min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";
-
 
         
             RegisterOperators(05, "min");

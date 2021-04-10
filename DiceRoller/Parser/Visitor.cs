@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using DiceRoller.Dice;
+using DiceRoller.DragonQuest;
 using Irony.Parsing;
 
 namespace DiceRoller.Parser
@@ -44,6 +45,9 @@ namespace DiceRoller.Parser
 
                 case "roll":
                     return EvaluateDiceExpression(node);
+
+                case "injury":
+                    return EvaluateInjury();
             }
 
             throw new InvalidOperationException($"Unrecognizable term {node.Term.Name}.");
@@ -100,6 +104,13 @@ namespace DiceRoller.Parser
             }
 
             return new ResultNode(total, "(" + String.Join(", ", breakdown.ToArray()) + ")");
+        }
+
+        private ResultNode EvaluateInjury()
+        {
+            var diceRoll = RollGenerator(100, isExploding: false).First();
+            var injury = new GrievousInjuries().GetInjury(diceRoll.Roll);
+            return new ResultNode(diceRoll.Roll, injury);
         }
 
         private ResultNode EvaluateFuncOperation(ParseTreeNode node, Func<float, float, float> operation, string symbol)
