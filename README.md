@@ -3,16 +3,20 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 
 ## Features
 
-| Example                    | Notes                  |
-|----------------------------|------------------------|
-| (67 + 54 - 20)/15          | Arithmetic             |
-| d4                         | Dice rolling           |
-| 3d6+2                      |                        |
-| 3d6!                       | Exploding dice         |
-| (3d10 + 5) * d7 / 2 - 1d2! | Combo                  |
-| 1d6+8 # Orc's Damage       | Comments               |
-| min(d10-4,1)               | Minimum roll outcome   |
-| repeat(d10, 5)             | Repeat rolls           |
+| Feature                | Example                    |
+|------------------------|----------------------------|
+| Arithmetic             | (67 + 54 - 20)/15          |
+| Dice rolling           | d4                         |
+|                        | 3d6+2                      |
+| Exploding dice         | 3d6!                       |
+| Combo                  | (3d10 + 5) * d7 / 2 - 1d2! |
+| Comments               | 1d6+8 # Orc's Damage       |
+| Minimum roll outcome   | min(d10-4,1)               |
+| Repeat rolls           | repeat(d10, 5)             |
+
+| Custom Command         | Description                    |
+|------------------------|--------------------------------|
+| injury                 | Generates a DQ Grievous Injury |
 
 
 ## REPL
