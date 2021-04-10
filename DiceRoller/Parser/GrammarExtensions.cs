@@ -6,13 +6,8 @@ namespace DiceRoller.Parser
     {
         public void Extend(Grammar grammar)
         {
-            // Terminals
-            var injury = grammar.ToTerm("injury");
-
-            // Nonterminals
-
-            // Rules
-            grammar.Root.Rule |= injury;
+            grammar.Root.Rule |= grammar.ToTerm("injury");
+            grammar.Root.Rule |= grammar.ToTerm("backfire");
         }
     }
 }

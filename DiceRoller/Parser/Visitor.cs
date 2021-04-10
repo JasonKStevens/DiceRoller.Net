@@ -11,6 +11,8 @@ namespace DiceRoller.Parser
     public class Visitor
     {
         private readonly IRandomNumberGenerator _randomNumberGenerator;
+        private readonly GrievousInjuries _grievousInjuries = new GrievousInjuries();
+        private readonly Backfires _backfires = new Backfires();
 
         public Visitor(IRandomNumberGenerator randomNumberGenerator)
         {
@@ -47,7 +49,10 @@ namespace DiceRoller.Parser
                     return EvaluateDiceExpression(node);
 
                 case "injury":
-                    return EvaluateInjury();
+                    return Generate(_grievousInjuries);
+
+                case "backfire":
+                    return Generate(_backfires);
             }
 
             throw new InvalidOperationException($"Unrecognizable term {node.Term.Name}.");
@@ -106,10 +111,10 @@ namespace DiceRoller.Parser
             return new ResultNode(total, "(" + String.Join(", ", breakdown.ToArray()) + ")");
         }
 
-        private ResultNode EvaluateInjury()
+        private ResultNode Generate(LookupTable lookupTable)
         {
             var diceRoll = RollGenerator(100, isExploding: false).First();
-            var injury = new GrievousInjuries().GetInjury(diceRoll.Roll);
+            var injury = lookupTable.LookupResult(diceRoll.Roll);
             return new ResultNode(diceRoll.Roll, injury);
         }
 

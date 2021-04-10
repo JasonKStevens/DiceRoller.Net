@@ -23,7 +23,7 @@ namespace DiceRoller.Test
         public void InjuryRoll_WithinBounds_ReturnsCorrectResult(int diceRoll, string startOfText)
         {
             // Act
-            var injury = _sut.GetInjury(diceRoll);
+            var injury = _sut.LookupResult(diceRoll);
 
             // Assert
             Assert.That(injury.StartsWith(startOfText), Is.True);
@@ -34,7 +34,7 @@ namespace DiceRoller.Test
         public void InjuryRoll_OutsideOfBounds_Throws(int diceRoll)
         {
             // Assert
-            Assert.That(() => _sut.GetInjury(diceRoll), Throws.TypeOf<ArgumentException>());
+            Assert.That(() => _sut.LookupResult(diceRoll), Throws.TypeOf<ArgumentException>());
         }
     }
 }
