@@ -54,3 +54,4 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 </pre>
 
 ## TODO
+Add --help support
