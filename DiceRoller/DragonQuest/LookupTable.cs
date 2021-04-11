@@ -25,4 +25,18 @@ namespace DiceRoller.DragonQuest
             return value;
         }
     }
+
+    public class DQLookupTables
+    {
+        public readonly GrievousInjuries Injuries;
+        public readonly Backfires Backfires;
+        public readonly FearResult Fear;
+
+        public DQLookupTables(GrievousInjuries injuries, Backfires backfires, FearResult fear)
+        {
+            Injuries = injuries;
+            Backfires = backfires;
+            Fear = fear;
+        }
+    }
 }

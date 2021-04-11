@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DiceRoller.Dice;
+using DiceRoller.DragonQuest;
 using DiceRoller.Parser;
 using DiscordRollerBot;
 using DSharpPlus;
@@ -62,6 +63,10 @@ namespace DiceRollerCmd
 
             services.AddSingleton<IRandomNumberGenerator, RandomNumberGenerator>();
             services.AddSingleton<Evaluator, Evaluator>();
+            services.AddSingleton<GrievousInjuries, GrievousInjuries>();
+            services.AddSingleton<Backfires, Backfires>();
+            services.AddSingleton<FearResult, FearResult>();
+            services.AddSingleton<DQLookupTables, DQLookupTables>();
 
             services.AddHostedService<BotHost>();
         }
@@ -72,13 +77,26 @@ namespace DiceRollerCmd
         private readonly ILogger<BotHost> _logger;
         private readonly IDiscordApi _discordInterface;
         private readonly Evaluator _evaluator;
+        private readonly GrievousInjuries _injuries;
+        private readonly Backfires _backfires;
+        private readonly FearResult _fears;
 
-        public BotHost(ILogger<BotHost> logger, IHostApplicationLifetime appLifetime, IDiscordApi discord, Evaluator evaluator)
+
+        public BotHost(ILogger<BotHost> logger, IHostApplicationLifetime appLifetime, IDiscordApi discord, Evaluator evaluator, DQLookupTables tables)
         {
             _logger = logger;
             _discordInterface = discord;
             _evaluator = evaluator;
+            _injuries = tables.Injuries;
+            _backfires = tables.Backfires;
+            _fears = tables.Fear;
+
             _discordInterface.AddHandler("!roll", HandleDiceRolls);
+            _discordInterface.AddHandler("!injury", (ins) => 
+            LookupResult(_injuries, ins));
+            _discordInterface.AddHandler("!specgrev", (ins) => LookupResult(_injuries, ins));
+            _discordInterface.AddHandler("!backfire", (ins) => LookupResult(_backfires, ins));
+            _discordInterface.AddHandler("!fear", (ins) => LookupResult(_fears, ins));
         }
 
         private string HandleDiceRolls(string instructions)
@@ -88,13 +106,50 @@ namespace DiceRollerCmd
             var builder = new StringBuilder();
             builder.Append("   __**"  + result.Value + "**__  ");
             if (result.Breakdown.Length > 50)
+            {
                 builder.AppendLine();
-            builder.Append("Reason:  ");
-            if (result.Breakdown.Length > 50)
+                builder.Append("Reason:  ");
                 builder.AppendLine();
-            builder.AppendLine(result.Breakdown);
+                builder.AppendLine("||" + result.Breakdown + "||");
+            } else {
+                builder.Append("Reason:  ");
+                builder.AppendLine(result.Breakdown);
+            }
 
             return builder.ToString();
+        }
+
+        private string LookupResult(LookupTable table, string instructions)
+        {
+            int roll = 0;
+
+            if (string.IsNullOrWhiteSpace(instructions))
+            {
+                roll = ( int ) _evaluator.Evaluate("d100").Value;
+            } else
+            {
+                if (!Int32.TryParse(instructions.Trim(), out roll))
+                {
+                    return "Huh?";
+                }
+            }
+
+            return table.LookupResult(roll);
+        }
+
+        private string HandleInjuryRoll(string instructions)
+        {
+            return LookupResult(_injuries, instructions);
+        }
+
+        private string HandleBackfireRoll(string instructions)
+        {
+            return LookupResult(_backfires, instructions);
+        }
+
+        private string HandleFearRoll(string instructions)
+        {
+            return LookupResult(_backfires, instructions);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

@@ -77,7 +77,7 @@ namespace DiscordRollerBot
                         (handled, response) = handler.Handle(tokens[0], instructions);
                         if (handled)
                         {
-                            response = name + " Roll: " + response;
+                            response = name + "l: " + response;
                             break;
                         } 
                     } catch (InvalidOperationException iex)

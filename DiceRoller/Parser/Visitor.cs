@@ -11,8 +11,6 @@ namespace DiceRoller.Parser
     public class Visitor
     {
         private readonly IRandomNumberGenerator _randomNumberGenerator;
-        private readonly GrievousInjuries _grievousInjuries = new GrievousInjuries();
-        private readonly Backfires _backfires = new Backfires();
 
         public Visitor(IRandomNumberGenerator randomNumberGenerator)
         {
@@ -47,12 +45,6 @@ namespace DiceRoller.Parser
 
                 case "roll":
                     return EvaluateDiceExpression(node);
-
-                case "injury":
-                    return Generate(_grievousInjuries);
-
-                case "backfire":
-                    return Generate(_backfires);
             }
 
             throw new InvalidOperationException($"Unrecognizable term {node.Term.Name}.");
