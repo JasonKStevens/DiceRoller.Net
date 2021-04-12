@@ -32,7 +32,7 @@ steps:
     projects: 'DiceRollerCmd/DiceRollerCmd.csproj'
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     modifyOutputPath: true
-    zipAfterPublish: true
+    zipAfterPublish: false
     publishWebProjects: false
 
 - task: PublishBuildArtifacts@1
