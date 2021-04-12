@@ -1,6 +1,7 @@
 using DiceRoller.Parser;
 using DiceRoller.Test.Helpers;
 using NUnit.Framework;
+using System;
 
 namespace DiceRoller.Test
 {
@@ -17,6 +18,7 @@ namespace DiceRoller.Test
             var evaluation = evaluator.Evaluate("d2!");
 
             // Assert
+            throw new Exception("Boom");
             Assert.That(evaluation.Value, Is.EqualTo(3));
             Assert.That(evaluation.Breakdown, Is.EqualTo("[2!, 1]"));
         }
