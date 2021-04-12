@@ -26,5 +26,17 @@ steps:
   displayName: 'Test'
 
 #Publish
-- script: dotnet publish 'DiceRollerCmd/DiceRollerCmd.csproj' -o '$(Build.ArtifactStagingDirectory)' -c $(buildConfiguration) --no-build
-  displayName: 'Publish'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    projects: 'DiceRollerCmd/DiceRollerCmd.csproj'
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    modifyOutputPath: true
+    zipAfterPublish: true
+    publishWebProjects: false
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'DiceRoller-Net'
+    publishLocation: 'Container'
