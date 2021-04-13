@@ -7,14 +7,15 @@ namespace DiceRoller.DragonQuest
     public abstract class LookupTable
     {
         protected IDictionary<int, string> Map;
+        protected int MaxRoll = 100;
 
         public string LookupResult(int diceRoll)
         {
             if (Map == null)
                 throw new Exception("Map not defined in lookup table");
 
-            if (diceRoll < 1 || diceRoll > 100)
-                throw new ArgumentException("Roll must be between 1 and 100 inclusive", nameof(diceRoll));
+            if (diceRoll < 1 || diceRoll > MaxRoll)
+                throw new ArgumentException($"Roll must be between 1 and {MaxRoll} inclusive", nameof(diceRoll));
 
             var injuryKeys = Map.Keys.ToList();
 

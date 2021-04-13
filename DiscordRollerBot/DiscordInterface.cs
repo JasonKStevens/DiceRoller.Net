@@ -80,9 +80,9 @@ namespace DiscordRollerBot
                             response = name + "l: " + response;
                             break;
                         } 
-                    } catch (InvalidOperationException iex)
+                    } catch (Exception ex)
                     {
-                        response = name + ": " + iex.Message;
+                        response = name + ": " + ex.Message;
                         break;
                     }
                 }

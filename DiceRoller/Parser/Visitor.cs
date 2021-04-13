@@ -11,10 +11,12 @@ namespace DiceRoller.Parser
     public class Visitor
     {
         private readonly IRandomNumberGenerator _randomNumberGenerator;
+        private readonly Func<int, ResultNode> _stepEvalFunc;
 
-        public Visitor(IRandomNumberGenerator randomNumberGenerator)
+        public Visitor(IRandomNumberGenerator randomNumberGenerator, Func<int, ResultNode> stepEvalFunc)
         {
             _randomNumberGenerator = randomNumberGenerator;
+            _stepEvalFunc = stepEvalFunc;
         }
 
         public ResultNode Visit(ParseTreeNode node)
@@ -42,6 +44,9 @@ namespace DiceRoller.Parser
 
                 case "repeat":
                     return EvaluateRepeatOperation(node);
+
+                case "step":
+                    return EvaluateStepOperation(node);
 
                 case "roll":
                     return EvaluateDiceExpression(node);
@@ -119,6 +124,19 @@ namespace DiceRoller.Parser
             
             return new ResultNode(value, $"{symbol}({leftNode.Breakdown}, {rightNode.Breakdown}) => **{value}**");
         }
+
+
+
+
+        private ResultNode EvaluateStepOperation(ParseTreeNode node)
+        {
+            var stepValue = Visit(node.ChildNodes[1]);
+
+            var result = _stepEvalFunc((int) stepValue.Value);
+
+           
+            return new ResultNode(result.Value, $"{result.Breakdown}");
+        }        
 
         private (ResultNode left, ResultNode right) GetBinaryNodes(ParseTreeNode node)
         {
