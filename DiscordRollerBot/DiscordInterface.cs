@@ -77,7 +77,7 @@ namespace DiscordRollerBot
                         (handled, response) = handler.Handle(tokens[0], instructions);
                         if (handled)
                         {
-                            response = name + "l: " + response;
+                            response = name + ": " + response;
                             break;
                         } 
                     } catch (Exception ex)
