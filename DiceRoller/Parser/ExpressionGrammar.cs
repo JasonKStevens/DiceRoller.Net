@@ -18,6 +18,8 @@ namespace DiceRoller.Parser
             // Nonterminals
             var expression = new NonTerminal("expression");
             var brackets = new NonTerminal("brackets");
+
+            var numericExpression = new NonTerminal("numeric-expression");
             var add = new NonTerminal("add");
             var subtract = new NonTerminal("subtract");
             var multiply = new NonTerminal("multiply");
@@ -27,33 +29,56 @@ namespace DiceRoller.Parser
             var min = new NonTerminal("min");
             var repeat = new NonTerminal("repeat");
 
+            var inequalityExpression = new NonTerminal("inequality-expression");
+            var lt = new NonTerminal("less-than");
+            var lteq = new NonTerminal("less-than-or-equal-to");
+            var equalTo = new NonTerminal("equal-to");
+            var gteq = new NonTerminal("greater-than-or-equal-to");
+            var gt = new NonTerminal("greater-than");
+
             // Rules
-            expression.Rule = number | brackets | add | subtract | multiply | divide | min | roll | comment | repeat;
+            expression.Rule = numericExpression | inequalityExpression | comment;
+
+            numericExpression.Rule = number | brackets | roll;
+            numericExpression.Rule |= add | subtract | multiply | divide;
+            numericExpression.Rule |= min | repeat;
+
+            inequalityExpression.Rule = lt | lteq | equalTo | gteq | gt;
+            inequalityExpression.Rule |= repeat;
             
-            brackets.Rule = "(" + expression + ")";
-            add.Rule = expression + "+" + expression;
-            subtract.Rule = expression + "-" + expression;
-            multiply.Rule = expression + "*" + expression;
-            divide.Rule = expression + "/" + expression;
+            brackets.Rule = "(" + numericExpression + ")";
+            add.Rule = numericExpression + "+" + numericExpression | "+" + numericExpression;
+            subtract.Rule = numericExpression + "-" + numericExpression | "-" + numericExpression;
+            multiply.Rule = numericExpression + "*" + numericExpression;
+            divide.Rule = numericExpression + "/" + numericExpression;
+            lt.Rule = numericExpression + "<" + numericExpression;
+            lteq.Rule = numericExpression + "<=" + numericExpression;
+            equalTo.Rule = numericExpression + "=" + numericExpression;
+            gteq.Rule = numericExpression + ">=" + numericExpression;
+            gt.Rule = numericExpression + ">" + numericExpression;
 
             roll.Rule = dice + number | number + dice + number | dice + number + "!" | number + dice + number + "!";
             dice.Rule = new KeyTerm("d", "d") { AllowAlphaAfterKeyword = true };  // Avoid having to add whitespace either side of "d"
-            repeat.Rule = new KeyTerm("repeat", "repeat") + "(" + expression + "," + number + ")";
-            min.Rule = new KeyTerm("min", "min") + "(" + expression + "," + number + ")";
+            var repeatTerm = new KeyTerm("repeat", "repeat");
+            repeat.Rule =
+                repeatTerm + "(" + numericExpression + "," + number + ")" |
+                repeatTerm + "(" + inequalityExpression + "," + number + ")";
+            min.Rule = new KeyTerm("min", "min") + "(" + numericExpression + "," + number + ")";
 
-        
-            RegisterOperators(05, "min");
-            RegisterOperators(08, "repeat");
-            RegisterOperators(10, "+", "-");
-            RegisterOperators(30, "*", "/");
-            RegisterOperators(40, "d");
+            // Operators
+            RegisterOperators(0, "min");
+            RegisterOperators(1, "repeat");
+            RegisterOperators(2, "<", "<=", "=", ">=", ">");
+            RegisterOperators(3, "+", "-");
+            RegisterOperators(4, "*", "/");
+            RegisterOperators(5, "d");
 
             NonGrammarTerminals.Add(comment);
             RegisterBracePair("(", ")");
             MarkPunctuation("(", ")");
-            MarkTransient(expression, brackets);
+            MarkTransient(numericExpression, inequalityExpression, brackets);
 
-            this.Root = expression;
+            Root = expression;
         }
     }
 }

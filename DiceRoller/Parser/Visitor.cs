@@ -37,6 +37,21 @@ namespace DiceRoller.Parser
                 case "divide":
                     return EvaluateOperation(node, (l, r) => l / r, "/");
 
+                case "less-than":
+                    return EvaluateOperation(node, (l, r) => l < r ? 1 : 0, "<");
+
+                case "less-than-or-equal-to":
+                    return EvaluateOperation(node, (l, r) => l <= r ? 1 : 0, "<=");
+
+                case "equal-to":
+                    return EvaluateOperation(node, (l, r) => l == r ? 1 : 0, "=");
+
+                case "greater-than-or-equal-to":
+                    return EvaluateOperation(node, (l, r) => l >= r ? 1 : 0, ">=");
+
+                case "greater-than":
+                    return EvaluateOperation(node, (l, r) => l > r ? 1 : 0, ">");
+
                 case "min":
                     return EvaluateFuncOperation(node, (l, r) => (l < r) ? r : l, "min");
 
@@ -45,9 +60,13 @@ namespace DiceRoller.Parser
 
                 case "roll":
                     return EvaluateDiceExpression(node);
+
+                case "expression":
+                case "numeric-expression":
+                    return Visit(node.ChildNodes[0]);
             }
 
-            throw new InvalidOperationException($"Unrecognizable term {node.Term.Name}.");
+            throw new InvalidOperationException($"Unrecognizable term '{node.Term.Name}'.");
         }
 
         private ResultNode EvaluateDiceExpression(ParseTreeNode node)
@@ -82,8 +101,8 @@ namespace DiceRoller.Parser
         {
             (var leftNode, var rightNode) = GetBinaryNodes(node);
 
-            var value = operation(leftNode.Value, rightNode.Value);
-            return new ResultNode(value, $"{leftNode.Breakdown} {symbol} {rightNode.Breakdown}");
+            var value = operation(leftNode?.Value ?? 0, rightNode?.Value ?? 0);
+            return new ResultNode(value, $"{leftNode?.Breakdown ?? ""} {symbol} {rightNode?.Breakdown ?? ""}");
         }
 
         private ResultNode EvaluateRepeatOperation(ParseTreeNode node)
