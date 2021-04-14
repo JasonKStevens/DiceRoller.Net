@@ -75,7 +75,7 @@ namespace DiceRollerCmd
 
             var builder = new StringBuilder();
             builder.Append("   __**"  + result.Value + "**__  ");
-            if (result.Breakdown.Length > 50)
+            if (result.Breakdown.Length > 100)
             {
                 builder.AppendLine();
                 builder.Append("Reason:  ");

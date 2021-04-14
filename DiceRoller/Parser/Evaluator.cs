@@ -111,5 +111,7 @@ namespace DiceRoller.Parser
         private int _repeatingSeqCycleCount = 11;
 
         private Dictionary<int, EarthDawnStepDefinition> _parsedSteps = new Dictionary<int, EarthDawnStepDefinition>();
+
+        
     }
 }
