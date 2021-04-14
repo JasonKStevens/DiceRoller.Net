@@ -28,6 +28,7 @@ namespace DiceRoller.Parser
             var dice = new NonTerminal("dice");
             var min = new NonTerminal("min");
             var repeat = new NonTerminal("repeat");
+            var step  = new NonTerminal("step");
 
             var inequalityExpression = new NonTerminal("inequality-expression");
             var lt = new NonTerminal("less-than");
@@ -41,7 +42,7 @@ namespace DiceRoller.Parser
 
             numericExpression.Rule = number | brackets | roll;
             numericExpression.Rule |= add | subtract | multiply | divide;
-            numericExpression.Rule |= min | repeat;
+            numericExpression.Rule |= min | repeat | step;
 
             inequalityExpression.Rule = lt | lteq | equalTo | gteq | gt;
             inequalityExpression.Rule |= repeat;
@@ -64,14 +65,16 @@ namespace DiceRoller.Parser
                 repeatTerm + "(" + numericExpression + "," + number + ")" |
                 repeatTerm + "(" + inequalityExpression + "," + number + ")";
             min.Rule = new KeyTerm("min", "min") + "(" + numericExpression + "," + number + ")";
+            step.Rule = new KeyTerm("step", "step") + expression;
 
             // Operators
-            RegisterOperators(0, "min");
-            RegisterOperators(1, "repeat");
-            RegisterOperators(2, "<", "<=", "=", ">=", ">");
-            RegisterOperators(3, "+", "-");
-            RegisterOperators(4, "*", "/");
-            RegisterOperators(5, "d");
+            RegisterOperators(10, "min");
+            RegisterOperators(20, "repeat");
+            RegisterOperators(30, "<", "<=", "=", ">=", ">");
+            RegisterOperators(40, "+", "-");
+            RegisterOperators(50, "*", "/");
+            RegisterOperators(60, "step");
+            RegisterOperators(70, "d");
 
             NonGrammarTerminals.Add(comment);
             RegisterBracePair("(", ")");

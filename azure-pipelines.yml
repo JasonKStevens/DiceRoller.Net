@@ -1,8 +1,3 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
   branches:
     include:
@@ -18,6 +13,7 @@ variables:
   solution: 'DiceRoller.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  BotConfig.Token: '$(discord-token)'
 
 steps:
 
@@ -28,3 +24,19 @@ steps:
 # Test
 - script: dotnet test -c $(buildConfiguration) --no-build
   displayName: 'Test'
+
+#Publish
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    projects: 'DiceRollerCmd/DiceRollerCmd.csproj'
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    modifyOutputPath: true
+    zipAfterPublish: false
+    publishWebProjects: false
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'DiceRoller-Net'
+    publishLocation: 'Container'
