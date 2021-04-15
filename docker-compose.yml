@@ -1,0 +1,13 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
+
+version: '3.4'
+
+services:
+  dicerollercmd:
+    image: dicerollercmd
+    container_name: diceroller.net
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      - BotConfig__Token=${BotConfig__Token}
