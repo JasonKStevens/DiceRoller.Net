@@ -1,3 +1,4 @@
+using DiceRoller;
 using DSharpPlus.EventArgs;
 using System;
 
@@ -6,9 +7,9 @@ namespace DiscordRollerBot
     public class CommandRegistration
     {
         public string CommandPrefix;
-        public Func<string, string> Handler;
+        public Func<BotUser, string, string> Handler;
 
-        public CommandRegistration(string commandPrefix, Func<string, string> handler)
+        public CommandRegistration(string commandPrefix, Func<BotUser, string, string> handler)
         {
             CommandPrefix = commandPrefix;
             Handler = handler;
@@ -21,11 +22,11 @@ namespace DiscordRollerBot
         }
 
 
-        public (bool, string) Handle(string commandPrefix, string instructions)
+        public (bool, string) Handle(BotUser user, string commandPrefix, string instructions)
         {
             if (CommandPrefix.Equals(commandPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                return (true, Handler(instructions));
+                return (true, Handler(user, instructions));
             }
 
             return (false, null);

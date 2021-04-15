@@ -1,4 +1,5 @@
-﻿using DSharpPlus.EventArgs;
+﻿using DiceRoller;
+using DSharpPlus.EventArgs;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace DiscordRollerBot
 
         DiscordInterfaceStatus State {get; }
 
-        void AddHandler(string commandPrefix, Func<string, string> handler);
-
+        void AddHandler(string commandPrefix, Func<BotUser, string, string> handler);
     }
+
 }

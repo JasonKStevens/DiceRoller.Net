@@ -21,4 +21,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
+LABEL version="0.1"
+
 ENTRYPOINT ["./DiceRollerCmd"]

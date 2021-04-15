@@ -1,3 +1,4 @@
+using DiceRoller;
 using DiceRoller.Parser;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -27,7 +28,7 @@ namespace DiscordRollerBot
 
         public DiscordInterfaceStatus State { get; private set; }
 
-        public void AddHandler(string commandPrefix, Func<string, string> handler)
+        public void AddHandler(string commandPrefix, Func<BotUser, string, string> handler)
         {
             _commandHandlers.Add(new CommandRegistration(commandPrefix, handler));
         }
@@ -68,13 +69,17 @@ namespace DiscordRollerBot
                 if (discordMember != null)
                     name = discordMember.DisplayName;
 
+                var user = new BotUser(){
+                    Id = e.Author.Id.ToString(),
+                    DisplayName = name
+                };
 
 
                 foreach (var handler in _commandHandlers)
                 {
                     try
                     {
-                        (handled, response) = handler.Handle(tokens[0], instructions);
+                        (handled, response) = handler.Handle(user, tokens[0], instructions);
                         if (handled)
                         {
                             response = name + ": " + response;

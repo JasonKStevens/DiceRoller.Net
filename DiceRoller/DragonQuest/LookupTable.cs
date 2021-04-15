@@ -40,4 +40,5 @@ namespace DiceRoller.DragonQuest
             Fear = fear;
         }
     }
+
 }

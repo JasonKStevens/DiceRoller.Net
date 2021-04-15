@@ -57,6 +57,34 @@ namespace DiceRoller.Parser
             return result;
         }
 
+        public ResultNode Evaluate(ParseTree node)
+        {
+            var result = _visitor.Visit(node.Root);
+
+            var comments = node.Tokens.Where(x => x.Terminal is CommentTerminal).FirstOrDefault();
+            if (comments != null)
+            {
+                result = new ResultNode(result.Value, result.Breakdown + " " + comments.Text);
+            }
+
+            return result;
+        }
+
+        public ParseTree Parse(string input)
+        {
+            var syntaxTree = _parser.Parse(input);
+
+            if (syntaxTree.HasErrors())
+            {
+                var messages = syntaxTree.ParserMessages.Select(m => m.Message);
+                var detail = string.Join(Environment.NewLine + "- ", messages);
+                var message = $"Parser errors:{Environment.NewLine}- {detail}";
+                throw new InvalidOperationException(message);
+            }
+
+            return syntaxTree;
+        }
+
         public ResultNode EvaluateStep(int stepNumber)
         {
             if (!_parsedSteps.ContainsKey(stepNumber))
@@ -114,4 +142,5 @@ namespace DiceRoller.Parser
 
         
     }
+
 }

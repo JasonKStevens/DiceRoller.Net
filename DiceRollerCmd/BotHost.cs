@@ -3,9 +3,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DiceRoller;
 using DiceRoller.DragonQuest;
 using DiceRoller.Parser;
 using DiscordRollerBot;
+using Irony.Parsing;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -19,6 +21,7 @@ namespace DiceRollerCmd
         private readonly GrievousInjuries _injuries;
         private readonly Backfires _backfires;
         private readonly FearResult _fears;
+        private readonly UserAliases _aliases = new UserAliases();
 
         private readonly string _helpText;
 
@@ -32,11 +35,12 @@ namespace DiceRollerCmd
             _fears = tables.Fear;
 
             _discordInterface.AddHandler("!roll", HandleDiceRolls);
-            _discordInterface.AddHandler("!injury", (ins) => LookupResult(_injuries, ins));
-            _discordInterface.AddHandler("!specgrev", (ins) => LookupResult(_injuries, ins));
-            _discordInterface.AddHandler("!backfire", (ins) => LookupResult(_backfires, ins));
-            _discordInterface.AddHandler("!fear", (ins) => LookupResult(_fears, ins));
-            _discordInterface.AddHandler("!help", (ins) => _helpText);
+            _discordInterface.AddHandler("!injury", (user, ins) => LookupResult(_injuries, ins));
+            _discordInterface.AddHandler("!specgrev", (user, ins) => LookupResult(_injuries, ins));
+            _discordInterface.AddHandler("!backfire", (user, ins) => LookupResult(_backfires, ins));
+            _discordInterface.AddHandler("!fear", (user, ins) => LookupResult(_fears, ins));
+            _discordInterface.AddHandler("!alias", (user, ins) => ProcessAlias(user, ins));
+            _discordInterface.AddHandler("!help", (user, ins) => _helpText);
 
             var sb = new StringBuilder();
             sb.AppendLine("");
@@ -67,27 +71,74 @@ namespace DiceRollerCmd
             _helpText = sb.ToString();
         }
 
-        
+        private string ProcessAlias(BotUser user, string instructions)
+        {
+            if (string.IsNullOrWhiteSpace(instructions)) return string.Empty;
 
-        private string HandleDiceRolls(string instructions)
+            var tokens = instructions.Split(" ",StringSplitOptions.None);
+
+            string aliasName;
+            string aliasInstruction;
+            ParseTree tree;
+
+            switch (tokens[0].ToLower())
+            {
+                case "add":
+                    if (tokens.Length < 3)
+                        return "Cannot add an alias with no instructions. Syntax is: !alias add <name> <instruction>";
+
+                    aliasName = tokens[1].ToLower();
+                    aliasInstruction = string.Join(' ', tokens, 2, tokens.Length-2);
+                    tree = _evaluator.Parse(aliasInstruction);
+
+                    _aliases.AddUpdate(user.Id, aliasName, tree);
+
+                    return $"Alias '{aliasName}' added";
+                case "remove":
+                case "delete":
+                    if (tokens.Length < 2)
+                        return "Cannot remove an alias with no name. Syntax is: !alias remove <name>";
+
+                    aliasName = tokens[1].ToLower();
+
+                    _aliases.Remove(user.Id, aliasName);
+
+                    return $"Alias '{aliasName}' removed"; 
+                case "list":
+                    var list = _aliases.GetAliasList(user.Id);
+
+                    return $"Aliases for {user.DisplayName}:" + Environment.NewLine + string.Join(Environment.NewLine, list);
+                default:
+                    aliasName = tokens[0].ToLower();
+
+                    tree = _aliases.Get(user.Id, aliasName);
+                    return FormatResultNode(user, _evaluator.Evaluate(tree));
+            }
+        }
+
+        private string HandleDiceRolls(BotUser user, string instructions)
         {
             var result = _evaluator.Evaluate(instructions);
 
+            return FormatResultNode(user, result);
+        }
+
+        private string FormatResultNode(BotUser user, ResultNode node)
+        {
             var builder = new StringBuilder();
-            builder.Append("   __**"  + result.Value + "**__  ");
-            if (result.Breakdown.Length > 100)
+            builder.Append("   __**"  + node.Value + "**__  ");
+            if (node.Breakdown.Length > 100)
             {
                 builder.AppendLine();
                 builder.Append("Reason:  ");
                 builder.AppendLine();
-                builder.AppendLine("||" + result.Breakdown + "||");
+                builder.AppendLine("||" + node.Breakdown + "||");
             } else {
                 builder.Append("Reason:  ");
-                builder.AppendLine(result.Breakdown);
+                builder.AppendLine(node.Breakdown);
             }
 
-            return builder.ToString();
-        }
+            return builder.ToString();        }
 
         private string LookupResult(LookupTable table, string instructions)
         {
