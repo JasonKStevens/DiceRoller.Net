@@ -15,34 +15,31 @@ namespace DiscordRollerBot
     public class DiscordApi : IDiscordApi    
     {
         private readonly DiscordClient _client;
-        private readonly DiscordInterfaceConfiguration _config;
+        private readonly DiscordApiConfiguration _config;
         private readonly ILogger<DiscordApi> _logger;
 
-        private readonly List<CommandRegistration> _commandHandlers = new List<CommandRegistration>();
-        public DiscordApi(DiscordClient client, DiscordInterfaceConfiguration config, ILogger<DiscordApi> logger = null)
+        private readonly IEnumerable<ICommandProcessor> _commandProcessors;
+
+        public DiscordApi(DiscordClient client, DiscordApiConfiguration config, IEnumerable<ICommandProcessor> commandProcessors, ILogger<DiscordApi> logger = null)
         {
             _client = client;
             _config = config;
+            _commandProcessors = commandProcessors;
             _logger = logger ?? NullLogger<DiscordApi>.Instance;
         }
 
-        public DiscordInterfaceStatus State { get; private set; }
-
-        public void AddHandler(string commandPrefix, Func<BotUser, string, string> handler)
-        {
-            _commandHandlers.Add(new CommandRegistration(commandPrefix, handler));
-        }
+        public DiscordApiStatus State { get; private set; }
 
         public async Task<bool> Start()
         {
             _logger.LogInformation("Starting Discord Bot...");
-            State = DiscordInterfaceStatus.Starting;
+            State = DiscordApiStatus.Starting;
 
             _client.MessageCreated += HandleMessage;
             _logger.LogInformation("Connecting");
             await _client.ConnectAsync();
 
-            State = DiscordInterfaceStatus.Started;
+            State = DiscordApiStatus.Started;
             _logger.LogInformation("Started...");
 
             return await Task.FromResult(true);
@@ -56,12 +53,10 @@ namespace DiscordRollerBot
             _logger.LogInformation($"[{e.Message.MessageType}] ({e.Author}) {e.Message.Content}");
             
             var content = e.Message.Content.Trim();
-            var tokens = content.Split(' ', StringSplitOptions.None);
 
-            if (tokens.Length > 0)
+            if (!string.IsNullOrWhiteSpace(content))
             {
                 string response = null;
-                var instructions = String.Join(' ', tokens, 1, tokens.Length-1);
                 bool handled = false;
 
                 string name = e.Author.Username;
@@ -69,25 +64,23 @@ namespace DiscordRollerBot
                 if (discordMember != null)
                     name = discordMember.DisplayName;
 
-                var user = new BotUser(){
+                var user = new DiscordUserInfo(){
                     Id = e.Author.Id.ToString(),
                     DisplayName = name
                 };
 
-
-                foreach (var handler in _commandHandlers)
+                foreach (var processor in _commandProcessors)
                 {
                     try
                     {
-                        (handled, response) = handler.Handle(user, tokens[0], instructions);
+                        (handled, response) = processor.Process(user, content);
+
                         if (handled)
-                        {
-                            response = name + ": " + response;
                             break;
-                        } 
                     } catch (Exception ex)
                     {
-                        response = name + ": " + ex.Message;
+                        response = content + ": " + ex.Message;
+                        _logger.LogError(ex, processor.Prefix);
                         break;
                     }
                 }
@@ -108,12 +101,12 @@ namespace DiscordRollerBot
         {
             _logger.LogInformation("Starting Discord Bot...");
 
-            State = DiscordInterfaceStatus.Stopping;
+            State = DiscordApiStatus.Stopping;
 
             _logger.LogInformation("Disconnecting");
             await _client.DisconnectAsync();
 
-            State = DiscordInterfaceStatus.Stopped;
+            State = DiscordApiStatus.Stopped;
             _logger.LogInformation("Stopped");
 
             return await Task.FromResult(true);

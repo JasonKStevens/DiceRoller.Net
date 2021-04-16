@@ -1,6 +1,6 @@
 namespace DiceRoller
 {
-    public class BotUser
+    public class DiscordUserInfo
     {
         public string Id {get;set;}
         public string DisplayName {get;set;}

@@ -1,6 +1,6 @@
 namespace DiscordRollerBot
 {
-    public class DiscordInterfaceConfiguration
+    public class DiscordApiConfiguration
     {
         public string Token {get;set;}
         public string CommandPrefix {get;set;}

@@ -41,7 +41,7 @@ namespace DiceRollerCmd
         {
             _services = services;
 
-            var botConfig = new DiscordInterfaceConfiguration();
+            var botConfig = new DiscordApiConfiguration();
             context.Configuration.Bind("BotConfig", botConfig);
             services.AddSingleton(botConfig);
 
@@ -63,6 +63,8 @@ namespace DiceRollerCmd
             services.AddSingleton<Backfires, Backfires>();
             services.AddSingleton<FearResult, FearResult>();
             services.AddSingleton<DQLookupTables, DQLookupTables>();
+
+            services.RegisterAllTypes<ICommandProcessor>(new[] {typeof(Program).Assembly}, ServiceLifetime.Singleton);
 
             services.AddHostedService<BotHost>();
         }

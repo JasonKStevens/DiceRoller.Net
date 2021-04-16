@@ -40,7 +40,10 @@ namespace DiceRoller.Parser
             userId = userId.ToLower();
             var userAliases = GetUsersAliases(userId);
 
-            return userAliases[label];
+            if (userAliases.ContainsKey(label))
+                return userAliases[label];
+
+            return null;
         }
 
         public List<string> GetAliasList(string userId)

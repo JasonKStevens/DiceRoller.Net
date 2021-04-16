@@ -11,9 +11,7 @@ namespace DiscordRollerBot
         Task<bool> Start();
         Task<bool> Stop();
 
-        DiscordInterfaceStatus State {get; }
-
-        void AddHandler(string commandPrefix, Func<BotUser, string, string> handler);
+        DiscordApiStatus State {get; }
     }
 
 }
