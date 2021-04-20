@@ -69,7 +69,7 @@ namespace DiceRollerCmd
                 case "removealias":
                 case "deletealias":
                     if (tokens.Length < 3)
-                        return (true, "Cannot remove an alias with no name. Syntax is: {Prefix} {tokens[0]} <name>");
+                        return (true, userInfo.DisplayName + ": Cannot remove an alias with no name. Syntax is: {Prefix} {tokens[0]} <name>");
 
                     aliasName = tokens[2].ToLower();
 
@@ -91,9 +91,9 @@ namespace DiceRollerCmd
                     tree = _aliases.Get(userInfo.Id, aliasName);
 
                     if (tree != null)
-                        return (true, FormatResultNode(userInfo, _evaluator.Evaluate(tree)));
+                        return (true, userInfo.DisplayName + ": " + FormatResultNode(userInfo, _evaluator.Evaluate(tree)));
 
-                    return (true, FormatResultNode(userInfo, _evaluator.Evaluate(string.Join(' ', tokens, 1, tokens.Length-1))));
+                    return (true, userInfo.DisplayName + ": " + FormatResultNode(userInfo, _evaluator.Evaluate(string.Join(' ', tokens, 1, tokens.Length-1))));
             }
         }
 
