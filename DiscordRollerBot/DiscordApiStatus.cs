@@ -1,6 +1,6 @@
 namespace DiscordRollerBot
 {
-    public enum DiscordInterfaceStatus
+    public enum DiscordApiStatus
     {
         None,
         Stopped,

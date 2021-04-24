@@ -16,10 +16,15 @@ A .Net dice roller based on the [Irony](https://github.com/IronyProject/Irony) l
 | Minimum roll outcome   | min(d10-4,1)               |
 | Repeat rolls           | repeat(d10, 5)             |
 
-| Custom Command         | Description                    |
-|------------------------|--------------------------------|
-| backfire               | Generates a DQ Backfire result |
-| injury                 | Generates a DQ Grievous Injury |
+| Custom Command         | Description                                       |
+|------------------------|---------------------------------------------------|
+| backfire               | Generates a DQ Backfire result                    |
+| injury                 | Generates a DQ Grievous Injury                    |
+| fear                   | Generates a DQ Fear Result                        |
+| help                   | Usage details                                     |
+| spelldmg               | Displays spell detail, with dmg at specified rank |
+| skill                  | Displays skill detail, with roll calculations     |
+| save <alias> <ins>     | Saves an alias for the instructions, for user     |
 
 
 ## REPL
