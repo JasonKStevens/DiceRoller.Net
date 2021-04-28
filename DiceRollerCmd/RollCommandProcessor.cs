@@ -84,7 +84,7 @@ namespace DiceRollerCmd
 
                 case "help":
                     return (true, Constants.GetHelpText());
-                    
+
                 default:
                     aliasName = tokens[1].ToLower();
 
@@ -100,7 +100,7 @@ namespace DiceRollerCmd
         private string FormatResultNode(DiscordUserInfo user, ResultNode node)
         {
             var builder = new StringBuilder();
-            builder.Append("   __**"  + node.Value + "**__  ");
+            builder.Append("   __**"  + Emotify(node.Value) + "**__  ");
             if (node.Breakdown.Length > 100)
             {
                 builder.AppendLine();
@@ -115,6 +115,21 @@ namespace DiceRollerCmd
             return builder.ToString();        
         }
 
+        private string Emotify(float value)
+        {
+            return value.ToString()
+                            .Replace("0", ":zero:")
+                            .Replace("1", ":one:")
+                            .Replace("2", ":two:")
+                            .Replace("3", ":three:")
+                            .Replace("4", ":four:")
+                            .Replace("5", ":five:")
+                            .Replace("6", ":six:")
+                            .Replace("7", ":seven:")
+                            .Replace("8", ":eight:")
+                            .Replace("9", ":nine:");
+        }
+
 
         private string GenerateResult(LookupTable table, string instructions)
         {
@@ -122,7 +137,7 @@ namespace DiceRollerCmd
                 instructions = "d100";
 
             int roll = ( int ) _evaluator.Evaluate(instructions).Value;
-            return "__**" + roll + "**__" +Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(roll) + "```";
+            return "__**" + Emotify(roll) + "**__" +Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(roll) + "```";
         }
     }
 
