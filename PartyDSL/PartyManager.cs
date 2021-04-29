@@ -1,7 +1,6 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace PartyDSL
 {
@@ -44,13 +43,14 @@ namespace PartyDSL
 
         public string Serialize()
         {
-            return JsonSerializer.Serialize(_parties, new JsonSerializerOptions(){
+            return JsonConvert.SerializeObject(_parties, new JsonSerializerSettings(){
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
             });
         }
 
         public void Hydrate(string json)
         {
-            _parties = JsonSerializer.Deserialize<Dictionary<string, Party>>(json, new JsonSerializerOptions() {
+            _parties = JsonConvert.DeserializeObject<Dictionary<string, Party>>(json, new JsonSerializerSettings() {
             });
         }
     }
