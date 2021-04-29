@@ -32,7 +32,7 @@ namespace PartyDSL.Parser
             var listParties = new KeyTerm("list", "listparties");
 
             // Rules
-            expression.Rule = create | addMember | listParties | showMembers | removeMember | deleteParty | setValue | roll | loadConfig | saveConfig | json | help;
+            expression.Rule = create | addMember | listParties | showMembers | removeMember | deleteParty | setValue | roll | loadConfig | saveConfig | help;
 
             create.Rule = new KeyTerm("create", "create") + partyName;
             loadConfig.Rule = new KeyTerm("load", "load") + json;

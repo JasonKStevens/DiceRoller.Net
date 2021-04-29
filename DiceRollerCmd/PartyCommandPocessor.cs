@@ -24,6 +24,9 @@ namespace DiceRollerCmd
  
             var tokens = commandText.Split(" ",StringSplitOptions.None);
 
+            if (tokens[0].ToLower() != Prefix)
+                return (false, string.Empty);
+
             var result = _evaluator.Evaluate(string.Join(' ', tokens, 1, tokens.Length-1));
 
             if (result.Value.Contains("```"))
