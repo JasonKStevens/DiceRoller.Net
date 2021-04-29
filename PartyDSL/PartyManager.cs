@@ -45,16 +45,12 @@ namespace PartyDSL
         public string Serialize()
         {
             return JsonSerializer.Serialize(_parties, new JsonSerializerOptions(){
-                IncludeFields = true,
-                ReferenceHandler = ReferenceHandler.Preserve
             });
         }
 
         public void Hydrate(string json)
         {
             _parties = JsonSerializer.Deserialize<Dictionary<string, Party>>(json, new JsonSerializerOptions() {
-                ReferenceHandler = ReferenceHandler.Preserve,
-                IncludeFields = true
             });
         }
     }
