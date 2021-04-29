@@ -35,7 +35,7 @@ namespace DiceRoller.Test
         {
             // Arrange
             var generator = DiceHelper.GetMoqGeneratorForStaticResult(4);
-            var evaluator = new Evaluator(generator);
+            var evaluator = new DiceRollEvaluator(generator);
 
             // Act
             var evaluation = evaluator.Evaluate(roll);

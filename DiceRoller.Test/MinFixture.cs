@@ -15,7 +15,7 @@ namespace DiceRoller.Test
         {
             // Arrange
             var sequenceGenerator = DiceHelper.GetSequenceGenerator(5);
-            var evaluator = new Evaluator(sequenceGenerator);
+            var evaluator = new DiceRollEvaluator(sequenceGenerator);
 
             // Act
             var evaluation = evaluator.Evaluate(roll);
@@ -29,7 +29,7 @@ namespace DiceRoller.Test
         {
             // Arrange
             var sequenceGenerator = DiceHelper.GetSequenceGenerator(5);
-            var evaluator = new Evaluator(sequenceGenerator);
+            var evaluator = new DiceRollEvaluator(sequenceGenerator);
 
             // Act
             var evaluation = evaluator.Evaluate("d10 # test comment for testing tests");

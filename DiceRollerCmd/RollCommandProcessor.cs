@@ -12,13 +12,13 @@ namespace DiceRollerCmd
     {
         public string Prefix => "!roll";
 
-        private readonly Evaluator _evaluator;
+        private readonly DiceRollEvaluator _evaluator;
         private readonly GrievousInjuries _injuries;
         private readonly Backfires _backfires;
         private readonly FearResult _fears;
         private readonly UserAliases _aliases = new UserAliases();
 
-        public RollCommandProcessor(Evaluator evaluator,  DQLookupTables tables)
+        public RollCommandProcessor(DiceRollEvaluator evaluator,  DQLookupTables tables)
         {
             _evaluator = evaluator;
             _injuries = tables.Injuries;
@@ -97,7 +97,7 @@ namespace DiceRollerCmd
             }
         }
 
-        private string FormatResultNode(DiscordUserInfo user, ResultNode node)
+        private string FormatResultNode(DiscordUserInfo user, DiceResultNode node)
         {
             var builder = new StringBuilder();
             builder.Append("   __**"  + Emotify(node.Value) + "**__  ");

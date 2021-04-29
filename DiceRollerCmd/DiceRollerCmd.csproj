@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DiceRoller\DiceRoller.csproj" />
     <ProjectReference Include="..\DiscordRollerBot\DiscordRollerBot.csproj" />
+    <ProjectReference Include="..\PartyDSL\PartyDSL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +20,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp5</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -11,7 +11,7 @@ namespace DiceRoller.Repl
             Console.WriteLine("eg. (3d10 + 5) / 2 + 1d2!");
             Console.WriteLine();
 
-            var evaluator = new Evaluator(new RandomNumberGenerator());
+            var evaluator = new DiceRollEvaluator(new RandomNumberGenerator());
 
             while (true)
             {

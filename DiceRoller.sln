@@ -18,6 +18,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiceRollerCmd", "DiceRoller
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceRoller.Repl", "DiceRoller.Repl\DiceRoller.Repl.csproj", "{F8FBD916-E798-4001-8769-BB3771C933CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PartyDSL", "PartyDSL\PartyDSL.csproj", "{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PartyDSL.Test", "PartyDSL.Test\PartyDSL.Test.csproj", "{F081D260-F9CA-40EF-867B-CB3D037D51BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +48,14 @@ Global
 		{F8FBD916-E798-4001-8769-BB3771C933CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8FBD916-E798-4001-8769-BB3771C933CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8FBD916-E798-4001-8769-BB3771C933CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

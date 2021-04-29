@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PartyDSL;
+using PartyDSL.Parser;
 
 namespace DiceRollerCmd
 {
@@ -58,11 +60,14 @@ namespace DiceRollerCmd
             services.AddSingleton<IDiscordApi, DiscordApi>();
 
             services.AddSingleton<IRandomNumberGenerator, RandomNumberGenerator>();
-            services.AddSingleton<Evaluator, Evaluator>();
+            services.AddSingleton<DiceRollEvaluator, DiceRollEvaluator>();
             services.AddSingleton<GrievousInjuries, GrievousInjuries>();
             services.AddSingleton<Backfires, Backfires>();
             services.AddSingleton<FearResult, FearResult>();
             services.AddSingleton<DQLookupTables, DQLookupTables>();
+
+            services.AddSingleton<IPartyManager, PartyManager>();
+            services.AddSingleton<PartyCommandEvaluator>();
 
             services.RegisterAllTypes<ICommandProcessor>(new[] {typeof(Program).Assembly}, ServiceLifetime.Singleton);
 
