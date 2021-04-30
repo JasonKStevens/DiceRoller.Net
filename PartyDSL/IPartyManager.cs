@@ -10,6 +10,7 @@ namespace PartyDSL
 
         Party Delete(string partyName);
 
+
         string Serialize();
         void Hydrate(string json);
     }

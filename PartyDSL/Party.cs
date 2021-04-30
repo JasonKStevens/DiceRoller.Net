@@ -8,6 +8,7 @@ namespace PartyDSL
     {
         public string Name;
         public Dictionary<string, PartyMember> Members = new Dictionary<string, PartyMember>();
+        private readonly Dictionary<string, string> _history = new Dictionary<string, string>();
 
 
         public Party(string name)
@@ -60,6 +61,19 @@ namespace PartyDSL
             return result;
         }
 
+        public void StoreRoll(string rollName, string value)
+        {
+            _history[rollName.ToLower()] = value;
+        }
 
+        public string GetLastRoll(string rollName)
+        {
+            if (!_history.ContainsKey(rollName.ToLower()))
+            {
+                return "Not found.";
+            }
+
+            return _history[rollName.ToLower()];
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace PartyDSL.Parser
             // Terminals
             var partyName = new IdentifierTerminal("partyname");
             var memberName = new IdentifierTerminal("membername");
-            var varName = new IdentifierTerminal("varname");
+            var rollName = new IdentifierTerminal("varname");
             var value = new StringLiteral("value", "\"", StringOptions.NoEscapes | StringOptions.AllowsDoubledQuote);
             var json = new StringLiteral("json", "|", StringOptions.NoEscapes);
 
@@ -19,37 +19,42 @@ namespace PartyDSL.Parser
             var expression = new NonTerminal("expression");
 
             var create = new NonTerminal("createparty");
+            var listParties = new KeyTerm("list", "listparties");
             var loadConfig = new NonTerminal("loadconfig");
             var saveConfig = new NonTerminal("saveconfig");
-            var addMember = new NonTerminal("addmember");
-            var showMembers = new NonTerminal("showmembers");
-            var removeMember = new NonTerminal("removemember");
             var deleteParty = new NonTerminal("deleteparty");
+
+            var addMember = new NonTerminal("addmember");
+            var show = new NonTerminal("show");
+            var removeMember = new NonTerminal("removemember");
             var roll = new NonTerminal("roll");
+            var init = new NonTerminal("init");
             var help = new NonTerminal("help");
 
             var setValue = new NonTerminal("setvalue");
-            var listParties = new KeyTerm("list", "listparties");
 
             // Rules
-            expression.Rule = create | addMember | listParties | showMembers | removeMember | deleteParty | setValue | roll | loadConfig | saveConfig | help;
+            expression.Rule = create | addMember | listParties | show | removeMember | deleteParty | setValue | roll | loadConfig | saveConfig | help;
 
             create.Rule = new KeyTerm("create", "create") + partyName;
+            deleteParty.Rule = new KeyTerm("delete", "delete") + partyName;
             loadConfig.Rule = new KeyTerm("load", "load") + json;
             saveConfig.Rule = new KeyTerm("save", "save");
+
             var addTerm = new KeyTerm("add", "add");
-            addMember.Rule = addTerm + memberName + "to" + partyName + "as" + "an" + "ally" + "of" + memberName | addTerm + memberName + "to" + partyName;
+            addMember.Rule = addTerm + memberName + "as" + "an" + "ally" + "of" + memberName | addTerm + memberName;
+            
             var showTerm = new KeyTerm("show", "show");
-            showMembers.Rule = showTerm + "members" + "of" + partyName;
-            removeMember.Rule = new KeyTerm("remove", "remove") + memberName + "from" + partyName;
-            deleteParty.Rule = new KeyTerm("delete", "delete") + partyName;
+            show.Rule = showTerm + "members" | showTerm + "last" + rollName;
+            
+            removeMember.Rule = new KeyTerm("remove", "remove") + memberName;
             help.Rule = new KeyTerm("help", "help");
 
-            setValue.Rule = new KeyTerm("set", "set") + varName + "for" + memberName + "in" + "party" + partyName + "to" + value;
+            setValue.Rule = new KeyTerm("set", "set") + rollName + "for" + memberName + "to" + value;
             var rollTerm = new KeyTerm("roll", "roll");
-            roll.Rule = rollTerm + varName + "for" + "party" + partyName;
+            roll.Rule = rollTerm + rollName;
 
-            this.MarkPunctuation("to", "add", "create", "list", "as", "an", "ally", "of", "members", "from", "delete", "for", "in", "party");
+            this.MarkPunctuation("to", "add", "create", "list", "as", "an", "ally", "of", "members", "from", "delete", "for", "in", "party", "last");
 
             Root = expression;
         }
@@ -67,18 +72,28 @@ namespace PartyDSL.Parser
 
             sb.AppendLine("!party create <name>");
             sb.AppendLine("Creates a party with the given <name>.");
+            sb.AppendLine("!party list");
+            sb.AppendLine("Lists all parties.");
+            sb.AppendLine("!party delete <name>");
+            sb.AppendLine("Delete the party with the given <name>.");
 
-            sb.AppendLine("!party add <memberName> to <partyName>");
+            sb.AppendLine("!<partyName> add <memberName>");
             sb.AppendLine("Adds a new member to the party.");
 
-            sb.AppendLine("!party add <memberName> to <partyName> as an ally of <masterName>");
+            sb.AppendLine("!<partyName> add <memberName> as an ally of <masterName>");
             sb.AppendLine("Adds a new ally to the party that belongs to the master.");
 
-            sb.AppendLine("!party set <rollName> for <memberName> in party <partyName> to <rollDefinition>");
+            sb.AppendLine("!<partyName> set <rollName> for <memberName> to <rollDefinition>");
             sb.AppendLine("Configures a named roll for the member in the party.");
 
-            sb.AppendLine("!party roll <rollName> for party <partyName>");
+            sb.AppendLine("!<partyName> roll <rollName>");
             sb.AppendLine("Executes the named roll for each party member, returning in descending order. This is currently configured for doing INITIATIVE in dq, so agents will have their rolls adjusted.");
+
+            sb.AppendLine("!<partyName> show members");
+            sb.AppendLine("Lists the members of the party.");
+
+            sb.AppendLine("!<partyName> show last <rollName>");
+            sb.AppendLine("Shows the last roll by the party for the specific roll name.");
 
             sb.AppendLine("```");            
 

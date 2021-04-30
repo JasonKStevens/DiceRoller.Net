@@ -23,11 +23,12 @@ namespace DiceRollerCmd
             if (string.IsNullOrWhiteSpace(commandText)) return (false, string.Empty);
  
             var tokens = commandText.Split(" ",StringSplitOptions.None);
+            var prefix = tokens[0].ToLower();
 
-            if (tokens[0].ToLower() != Prefix)
+            if ((prefix != Prefix) && (!_evaluator.HasParty(prefix.Replace("!",""))))
                 return (false, string.Empty);
 
-            var result = _evaluator.Evaluate(string.Join(' ', tokens, 1, tokens.Length-1));
+            var result = _evaluator.Evaluate(prefix.Replace("!",""), string.Join(' ', tokens, 1, tokens.Length-1));
 
             if (result.Value.Contains("```"))
                 return (true, userInfo.DisplayName + ": " + result.Value);

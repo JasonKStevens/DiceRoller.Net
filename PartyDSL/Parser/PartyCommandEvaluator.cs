@@ -8,24 +8,25 @@ namespace PartyDSL.Parser
 {
     public class PartyCommandEvaluator
     {
-        private readonly PartyCommandVisitor _visitor;
         private readonly Irony.Parsing.Parser _parser;
         private readonly DiceRollEvaluator _rollEvaluator;
         private readonly IPartyManager _partyManager;
+        private readonly DiceRollEvaluator _evaluator;
 
         public PartyCommandEvaluator(DiceRollEvaluator evaluator, IPartyManager partyManager)
         {
-            _visitor = new PartyCommandVisitor(evaluator, partyManager);
             var grammar = new PartyGrammar();
             var language = new LanguageData(grammar);
             _parser = new Irony.Parsing.Parser(language);
 
             _rollEvaluator = evaluator;
             _partyManager = partyManager;
+            _evaluator = evaluator;
         }
 
-        public PartyResultNode Evaluate(string input)
+        public PartyResultNode Evaluate(string prefix, string input)
         {
+            var visitor = new PartyCommandVisitor(_evaluator, _partyManager, prefix);
             var syntaxTree = _parser.Parse(input);
 
             if (syntaxTree.HasErrors())
@@ -36,9 +37,14 @@ namespace PartyDSL.Parser
                 throw new InvalidOperationException(message);
             }
 
-            var result = _visitor.Visit(syntaxTree.Root);
+            var result = visitor.Visit(syntaxTree.Root);
 
             return result;
+        }
+
+        public bool HasParty(string party)
+        {
+            return _partyManager.GetAll().Any(x => x.Name.Equals(party, StringComparison.OrdinalIgnoreCase));
         }
 
     }

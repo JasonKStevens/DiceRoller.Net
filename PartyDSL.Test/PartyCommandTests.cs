@@ -23,7 +23,7 @@ namespace PartyDSL.Test
 
             var evaluator = new PartyCommandEvaluator(null, managerMock.Object);
 
-            var actual = evaluator.Evaluate("create test");
+            var actual = evaluator.Evaluate("!party", "create test");
 
             actual.Value.Should().Be("Created.");
 
@@ -47,7 +47,7 @@ namespace PartyDSL.Test
 
             var evaluator = new PartyCommandEvaluator(null, managerMock.Object);
 
-            var actual = evaluator.Evaluate("list");
+            var actual = evaluator.Evaluate("!party", "list");
 
             actual.Value.Should().Be(string.Join(Environment.NewLine, parties.Select(x => x.Name)));
 
@@ -65,7 +65,7 @@ namespace PartyDSL.Test
 
             var evaluator = new PartyCommandEvaluator(null, managerMock.Object);
 
-            var actual = evaluator.Evaluate("delete test");
+            var actual = evaluator.Evaluate("!party", "delete test");
 
             actual.Value.Should().Be("test deleted.");
 
@@ -75,16 +75,16 @@ namespace PartyDSL.Test
         [Test]
         public void AddMember_WillAddWithNoMaster()
         {
-            var party = new Party("party");
+            var party = new Party("p");
 
             var managerMock = new Mock<IPartyManager>();
             managerMock
-                .Setup(x => x.GetParty("party"))
+                .Setup(x => x.GetParty("p"))
                 .Returns(party);
 
             var evaluator = new PartyCommandEvaluator(null, managerMock.Object);
 
-            var actual = evaluator.Evaluate("add member to party");
+            var actual = evaluator.Evaluate("!p", "add member");
 
             actual.Value.Should().Be("member added.");
             var member = party.GetMember("member");
@@ -96,17 +96,17 @@ namespace PartyDSL.Test
         [Test]
         public void AddMember_WillAddWithMaster()
         {
-            var party = new Party("party");
+            var party = new Party("p");
             var master = party.AddMember("master");
 
             var managerMock = new Mock<IPartyManager>();
             managerMock
-                .Setup(x => x.GetParty("party"))
+                .Setup(x => x.GetParty("p"))
                 .Returns(party);
 
             var evaluator = new PartyCommandEvaluator(null, managerMock.Object);
 
-            var actual = evaluator.Evaluate("add member to party as an ally of master");
+            var actual = evaluator.Evaluate("!p", "add member as an ally of master");
 
             actual.Value.Should().Be("member added.");
             var member = party.GetMember("member");
@@ -118,17 +118,17 @@ namespace PartyDSL.Test
         [Test]
         public void RemoveMember_WillRemoveTheMember()
         {
-            var party = new Party("party");
+            var party = new Party("p");
             var master = party.AddMember("member");
 
             var managerMock = new Mock<IPartyManager>();
             managerMock
-                .Setup(x => x.GetParty("party"))
+                .Setup(x => x.GetParty("p"))
                 .Returns(party);
 
             var evaluator = new PartyCommandEvaluator(null, managerMock.Object);
 
-            var actual = evaluator.Evaluate("remove member from party");
+            var actual = evaluator.Evaluate("!p", "remove member");
 
             actual.Value.Should().Be("member removed.");
             var member = party.GetMember("member");
