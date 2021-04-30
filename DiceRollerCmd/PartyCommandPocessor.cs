@@ -39,7 +39,7 @@ namespace DiceRollerCmd
         private string FormatResultNode(DiscordUserInfo user, PartyResultNode node)
         {
             var builder = new StringBuilder();
-            builder.Append("```"  +node.Value + "```");
+            builder.Append("```" +Environment.NewLine + node.Value + "```");
             return builder.ToString();        
         }
 
