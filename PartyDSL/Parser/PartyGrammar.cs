@@ -10,7 +10,8 @@ namespace PartyDSL.Parser
         {
             // Terminals
             var partyName = new IdentifierTerminal("partyname");
-            var memberName = new IdentifierTerminal("membername");
+            // var memberName = new IdentifierTerminal("membername");
+            var memberName = new RegexBasedTerminal("membername", @"[\w\.\-]+");
             var rollName = new IdentifierTerminal("varname");
             var value = new StringLiteral("value", "\"", StringOptions.NoEscapes | StringOptions.AllowsDoubledQuote);
             var json = new StringLiteral("json", "|", StringOptions.NoEscapes);

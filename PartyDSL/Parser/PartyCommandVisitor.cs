@@ -24,6 +24,7 @@ namespace PartyDSL.Parser
         private List<string> BadPartyNames = new List<string>{
             "roll",
             "dq",
+            "party"
         };
 
         public PartyResultNode Visit(ParseTreeNode node)
