@@ -100,7 +100,7 @@ namespace DiceRollerCmd
         private string FormatResultNode(DiscordUserInfo user, DiceResultNode node)
         {
             var builder = new StringBuilder();
-            builder.Append("   __**"  + Emotify(node.Value) + "**__  ");
+            builder.Append("   "  + Emotify(node.Value) + "  ");
             if (node.Breakdown.Length > 100)
             {
                 builder.AppendLine();
@@ -118,6 +118,8 @@ namespace DiceRollerCmd
         private string Emotify(float value)
         {
             return value.ToString()
+//                            .Replace("-", ":traffic_light:")
+                            .Replace("-", "**--** ")
                             .Replace("0", ":zero:")
                             .Replace("1", ":one:")
                             .Replace("2", ":two:")
