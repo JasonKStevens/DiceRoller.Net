@@ -88,7 +88,8 @@ namespace DiscordRollerBot
                 if (handled && response==null)
                     response  = "Unrecognised command prefix";
 
-                await e.Message.RespondAsync(response);
+                if (response != null)
+                    await e.Message.RespondAsync(response);
                 return;
             }
 
