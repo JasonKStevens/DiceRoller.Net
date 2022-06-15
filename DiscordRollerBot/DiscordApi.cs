@@ -90,6 +90,7 @@ namespace DiscordRollerBot
 
                 if (response != null)
                     await e.Message.RespondAsync(response);
+
                 return;
             }
 

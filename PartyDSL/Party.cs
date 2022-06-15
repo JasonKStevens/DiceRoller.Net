@@ -8,7 +8,7 @@ namespace PartyDSL
     {
         public string Name;
         public Dictionary<string, PartyMember> Members = new Dictionary<string, PartyMember>();
-        private readonly Dictionary<string, string> _history = new Dictionary<string, string>();
+        public readonly Dictionary<string, string> _history = new Dictionary<string, string>();
 
 
         public Party(string name)
