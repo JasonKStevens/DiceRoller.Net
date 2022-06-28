@@ -44,14 +44,14 @@ namespace DiceRollerCmd
             switch (tokens[1].ToLower())
             {
                 case "backfire": 
-                    return (true, userInfo.DisplayName + ": " + GenerateResult(_backfires, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+                    return (true, GenerateResult(_backfires, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
 
                 case "specgrev":
                 case "injury":
-                    return (true, userInfo.DisplayName + ": " + GenerateResult(_injuries, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+                    return (true, GenerateResult(_injuries, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
 
                 case "fear":
-                    return (true, userInfo.DisplayName + ": " + GenerateResult(_fears, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+                    return (true, GenerateResult(_fears, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
 
                 case "addalias":
                     if (tokens.Length < 4)
@@ -64,23 +64,23 @@ namespace DiceRollerCmd
 
                     _aliases.AddUpdate(userInfo.Id, aliasName, tree);
 
-                    return (true, $"{userInfo.DisplayName}: Alias '{aliasName}' added");  
+                    return (true, $"Alias '{aliasName}' added");  
 
                 case "removealias":
                 case "deletealias":
                     if (tokens.Length < 3)
-                        return (true, userInfo.DisplayName + ": Cannot remove an alias with no name. Syntax is: {Prefix} {tokens[0]} <name>");
+                        return (true, "Cannot remove an alias with no name. Syntax is: {Prefix} {tokens[0]} <name>");
 
                     aliasName = tokens[2].ToLower();
 
                     _aliases.Remove(userInfo.Id, aliasName);
 
-                    return (true, $"{userInfo.DisplayName}: Alias '{aliasName}' removed");
+                    return (true, $"Alias '{aliasName}' removed");
 
                 case "listalias":
                     var list = _aliases.GetAliasList(userInfo.Id);
 
-                    return (true, $"{Environment.NewLine}Aliases for {userInfo.DisplayName}:" + Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, list));
+                    return (true, $"{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, list)}");
 
                 case "help":
                     return (true, Constants.GetHelpText());
@@ -91,9 +91,9 @@ namespace DiceRollerCmd
                     tree = _aliases.Get(userInfo.Id, aliasName);
 
                     if (tree != null)
-                        return (true, userInfo.DisplayName + ": " + FormatResultNode(userInfo, _evaluator.Evaluate(tree)));
+                        return (true, FormatResultNode(userInfo, _evaluator.Evaluate(tree)));
 
-                    return (true, userInfo.DisplayName + ": " + FormatResultNode(userInfo, _evaluator.Evaluate(string.Join(' ', tokens, 1, tokens.Length-1))));
+                    return (true, FormatResultNode(userInfo, _evaluator.Evaluate(string.Join(' ', tokens, 1, tokens.Length-1))));
             }
         }
 

@@ -14,6 +14,10 @@ namespace PartyDSL.Parser
             var memberName = new RegexBasedTerminal("membername", @"[\w\.\-]+");
             var rollName = new IdentifierTerminal("varname");
             var value = new StringLiteral("value", "\"", StringOptions.NoEscapes | StringOptions.AllowsDoubledQuote);
+            var number = new NumberLiteral("number", NumberOptions.IntOnly);
+            number.DefaultIntTypes = new TypeCode[] { TypeCode.Int16, TypeCode.Int32, TypeCode.Int64 };
+            number.DefaultFloatType = TypeCode.Single;
+
             var json = new StringLiteral("json", "|", StringOptions.NoEscapes);
 
             // Nonterminals
@@ -31,11 +35,13 @@ namespace PartyDSL.Parser
             var roll = new NonTerminal("roll");
             var init = new NonTerminal("init");
             var help = new NonTerminal("help");
+            var clearLucky = new NonTerminal("clearluckynumbers");
+            var addLucky = new NonTerminal("addluckynumber");
 
             var setValue = new NonTerminal("setvalue");
 
             // Rules
-            expression.Rule = create | addMember | listParties | show | removeMember | deleteParty | setValue | roll | loadConfig | saveConfig | help;
+            expression.Rule = create | addMember | listParties | show | removeMember | deleteParty | setValue | roll | loadConfig | saveConfig | help | clearLucky | addLucky;
 
             create.Rule = new KeyTerm("create", "create") + partyName;
             deleteParty.Rule = new KeyTerm("delete", "delete") + partyName;
@@ -54,6 +60,9 @@ namespace PartyDSL.Parser
             setValue.Rule = new KeyTerm("set", "set") + rollName + "for" + memberName + "to" + value;
             var rollTerm = new KeyTerm("roll", "roll");
             roll.Rule = rollTerm + rollName;
+
+            clearLucky.Rule = new KeyTerm("clearluckynumbers", "clearluckynumbers") + "for" + memberName;
+            addLucky.Rule = new KeyTerm("addluckynumber", "addluckynumber") + number + "to" + memberName;
 
             this.MarkPunctuation("to", "add", "create", "list", "as", "an", "ally", "of", "members", "from", "delete", "for", "in", "party", "last");
 

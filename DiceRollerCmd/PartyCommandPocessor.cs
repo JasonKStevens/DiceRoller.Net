@@ -31,15 +31,15 @@ namespace DiceRollerCmd
             var result = _evaluator.Evaluate(prefix.Replace("!",""), string.Join(' ', tokens, 1, tokens.Length-1));
 
             if (result.Value.Contains("```"))
-                return (true, userInfo.DisplayName + ": " + result.Value);
+                return (true, result.Value);
 
-            return (true, userInfo.DisplayName + ": " + FormatResultNode(userInfo, result));
+            return (true, FormatResultNode(userInfo, result));
         }
 
         private string FormatResultNode(DiscordUserInfo user, PartyResultNode node)
         {
             var builder = new StringBuilder();
-            builder.Append("```" +Environment.NewLine + node.Value + "```");
+            builder.Append("```llvm" +Environment.NewLine + node.Value + "```");
             return builder.ToString();        
         }
 

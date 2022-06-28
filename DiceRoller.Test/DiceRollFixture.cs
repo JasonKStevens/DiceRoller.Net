@@ -85,5 +85,20 @@ namespace DiceRoller.Test
             Assert.That(evaluation.Breakdown, Is.EqualTo("[700, 300]"));
         }
 
+        [Test]
+        public void Breakdown_1()
+        {
+            // Arrange
+            var sequenceGenerator = DiceHelper.GetSequenceGenerator(85, 24, 99, 5, 56, 97, 71);
+            var evaluator = new DiceRollEvaluator(sequenceGenerator);
+
+            // Act
+            var evaluation = evaluator.Evaluate("repeat(d100,7)");
+
+            // Assert
+            Assert.That(evaluation.Value, Is.EqualTo(437));
+            Assert.That(evaluation.Breakdown, Is.EqualTo("([85], [24], [99], [5], [56], [97], [71])"));
+        }
+
     }
 }

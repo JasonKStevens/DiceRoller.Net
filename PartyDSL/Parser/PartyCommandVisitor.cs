@@ -93,6 +93,7 @@ namespace PartyDSL.Parser
             {
                 case "membername":
                 case "varname":
+                case "number":
                 case "value":
                     return new PartyResultNode(node.Token.Text);
 
@@ -190,7 +191,14 @@ namespace PartyDSL.Parser
                         if (!string.IsNullOrWhiteSpace(roll))
                             rollValue = _diceRollEvaluator.Evaluate(roll);
 
-                        results.Add(new PartyMemberWithRoll(mem, rollValue.Value, rollValue.Breakdown));
+                        var breakdown = rollValue.Breakdown;
+                        foreach (var num in mem.LuckyNumbers)
+                        {
+                            breakdown = breakdown.Replace($"[{num}]", $"[@{num}]");
+                        }
+                        
+
+                        results.Add(new PartyMemberWithRoll(mem, rollValue.Value, breakdown));
                     }
 
                     foreach (var mem in members.Where(x => x.Master != null).ToList())
@@ -223,6 +231,46 @@ namespace PartyDSL.Parser
                     party.StoreRoll(rollName, result)                    ;
 
                     return new PartyResultNode(sb.ToString());
+
+                case "addluckynumber":
+                    var luckyNum = Convert.ToInt32(Visit(node.ChildNodes[1]).Value);
+                    memberName = Visit(node.ChildNodes[2]).Value;
+
+                    party = _partyManager.GetParty(_prefix);
+
+                    if (party == null)
+                        return new PartyResultNode($"Could not find party named {_prefix}");
+
+                    member = party.GetMember(memberName);
+
+                    if (member == null)
+                    {
+                        return new PartyResultNode($"Could not find party member {memberName} in party {_prefix}");
+                    }
+
+                    member.AddLuckyNumber(luckyNum);
+
+                    return new PartyResultNode($"Lucky number {luckyNum} added to {memberName}.");
+
+                case "clearluckynumbers":
+                    memberName = Visit(node.ChildNodes[1]).Value;
+
+                    party = _partyManager.GetParty(_prefix);
+
+                    if (party == null)
+                        return new PartyResultNode($"Could not find party named {_prefix}");
+
+                    member = party.GetMember(memberName);
+
+                    if (member == null)
+                    {
+                        return new PartyResultNode($"Could not find party member {memberName} in party {_prefix}");
+                    }
+
+                    member.ClearLuckyNumbers();
+
+                    return new PartyResultNode($"Lucky numbers cleared for {memberName}.");
+
 
                 case "expression":
                     return Visit(node.ChildNodes[0]);

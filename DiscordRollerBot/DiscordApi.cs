@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,6 +44,11 @@ namespace DiscordRollerBot
             _logger.LogInformation("Started...");
 
             return await Task.FromResult(true);
+        }
+
+        private static string GetNumbers(string input)
+        {
+            return new string(input.Where(c => char.IsDigit(c)).ToArray());
         }
 
         private async Task HandleMessage(DiscordClient sender, MessageCreateEventArgs e)
@@ -89,7 +95,35 @@ namespace DiscordRollerBot
                     response  = "Unrecognised command prefix";
 
                 if (response != null)
-                    await e.Message.RespondAsync(response);
+                {
+                    if (!response.Contains("```"))
+                    {
+                        var luckyNums = new List<int>();
+                        var nickname = discordMember.Nickname;
+                        if (nickname.Contains('[', ']'))
+                        {
+                            var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.Length - nickname.IndexOf('[')-2);
+                            var nums = luckynums.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var num in nums)
+                            {
+                                if (Int32.TryParse(GetNumbers(num), out int value))
+                                {
+                                    luckyNums.Add(value);
+                                }
+                            }
+                        }
+
+                        foreach (var num in luckyNums)
+                        {
+                            response = response.Replace($"[{num},", $"[:sparkles:{num},");
+                            response = response.Replace($" {num},", $" :sparkles:{num},");
+                            response = response.Replace($" {num}]", $" :sparkles:{num}]");
+                            response = response.Replace($"[{num}]", $"[:sparkles:{num}]");
+                        }
+                    }
+
+                    await e.Message.RespondAsync(user.DisplayName + ": " + response);
+                }
 
                 return;
             }

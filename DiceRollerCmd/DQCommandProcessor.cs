@@ -34,14 +34,14 @@ namespace DiceRollerCmd
             switch (tokens[1].ToLower())
             {
                 case "backfire": 
-                    return (true, userInfo.DisplayName + ": " + LookupResult(_backfires, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+                    return (true, LookupResult(_backfires, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
 
                 case "specgrev":
                 case "injury":
-                    return (true, userInfo.DisplayName + ": " + LookupResult(_injuries, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+                    return (true, LookupResult(_injuries, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
 
                 case "fear":
-                    return (true, userInfo.DisplayName + ": " + LookupResult(_fears, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+                    return (true, LookupResult(_fears, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
 
                 case "help":
                     return (true, Constants.GetHelpText());

@@ -5,19 +5,22 @@ namespace PartyDSL
     public class PartyMember
     {
         public string Name;
+        public List<int> LuckyNumbers;
         public PartyMember Master;
 
         public Dictionary<string, string> _rollDefinitions = new Dictionary<string, string>();
 
 
-        public PartyMember(string name, PartyMember master = null)
+        public PartyMember(string name, PartyMember master = null, List<int> luckyNumbers = null)
         {
             Name = name;
             Master = master;
+            LuckyNumbers = luckyNumbers ?? new List<int>();
         }
 
         public PartyMember()
         {
+            LuckyNumbers = new List<int>();
         }
 
         public void SetRoll(string rollName, string roll)
@@ -31,6 +34,16 @@ namespace PartyDSL
                 return null;
 
             return _rollDefinitions[rollName.ToLower()];
+        }
+
+        public void ClearLuckyNumbers()
+        {
+            LuckyNumbers.Clear();
+        }
+
+        public void AddLuckyNumber(int number)
+        {
+            LuckyNumbers.Add(number);
         }
     }
 
