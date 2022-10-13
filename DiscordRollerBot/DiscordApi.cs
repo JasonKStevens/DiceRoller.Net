@@ -99,10 +99,10 @@ namespace DiscordRollerBot
                     if (!response.Contains("```"))
                     {
                         var luckyNums = new List<int>();
-                        var nickname = discordMember.Nickname;
+                        var nickname = discordMember?.Nickname ?? e.Author.Username;
                         if (nickname.Contains('[', ']'))
                         {
-                            var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.Length - nickname.IndexOf('[')-2);
+                            var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.IndexOf(']') - nickname.IndexOf('[') - 1);
                             var nums = luckynums.Split(',', StringSplitOptions.RemoveEmptyEntries);
                             foreach (var num in nums)
                             {
