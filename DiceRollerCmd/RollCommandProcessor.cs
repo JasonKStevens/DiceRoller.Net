@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using DiceRoller;
 using DiceRoller.DragonQuest;
+using DiceRoller.Heroes;
 using DiceRoller.Parser;
 using DiscordRollerBot;
 using Irony.Parsing;
@@ -17,13 +20,17 @@ namespace DiceRollerCmd
         private readonly Backfires _backfires;
         private readonly FearResult _fears;
         private readonly UserAliases _aliases = new UserAliases();
+        private readonly SpeedTable _speeds;
+        private readonly LocationTable _locations;
 
-        public RollCommandProcessor(DiceRollEvaluator evaluator,  DQLookupTables tables)
+        public RollCommandProcessor(DiceRollEvaluator evaluator,  DQLookupTables dqTables, HerosLookupTables heroesTables)
         {
             _evaluator = evaluator;
-            _injuries = tables.Injuries;
-            _backfires = tables.Backfires;
-            _fears = tables.Fear;
+            _injuries = dqTables.Injuries;
+            _backfires = dqTables.Backfires;
+            _fears = dqTables.Fear;
+            _speeds = heroesTables.Speeds;
+            _locations = heroesTables.Locations;
         }
 
 
@@ -40,6 +47,13 @@ namespace DiceRollerCmd
             string aliasInstruction;
             ParseTree tree;
 
+            if (tokens.Length < 2)
+            {
+                var tkns = new List<string>(tokens);
+                tkns.Add("3d6");
+                tokens = tkns.ToArray();
+            }
+
             //what are we dealing with
             switch (tokens[1].ToLower())
             {
@@ -52,6 +66,13 @@ namespace DiceRollerCmd
 
                 case "fear":
                     return (true, GenerateResult(_fears, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length-2) : ""));
+
+                case "speed":
+                    return (true, GenerateResult(_speeds, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length - 2) : ""));
+
+                case "hitlocation":
+                case "hitloc":
+                    return (true, GenerateResult(_locations, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length - 2) : ""));
 
                 case "addalias":
                     if (tokens.Length < 4)
@@ -136,9 +157,10 @@ namespace DiceRollerCmd
         private string GenerateResult(LookupTable table, string instructions)
         {
             if (string.IsNullOrWhiteSpace(instructions))
-                instructions = "d100";
+                instructions = table.GetRoll();
 
             int roll = ( int ) _evaluator.Evaluate(instructions).Value;
+
             return "__**" + Emotify(roll) + "**__" +Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(roll) + "```";
         }
     }

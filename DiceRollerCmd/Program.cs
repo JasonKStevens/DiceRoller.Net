@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DiceRoller.Dice;
 using DiceRoller.DragonQuest;
+using DiceRoller.Heroes;
 using DiceRoller.Parser;
 using DiscordRollerBot;
 using DSharpPlus;
@@ -65,6 +66,9 @@ namespace DiceRollerCmd
             services.AddSingleton<Backfires, Backfires>();
             services.AddSingleton<FearResult, FearResult>();
             services.AddSingleton<DQLookupTables, DQLookupTables>();
+            services.AddSingleton<SpeedTable, SpeedTable>();
+            services.AddSingleton<LocationTable, LocationTable>();
+            services.AddSingleton<HerosLookupTables, HerosLookupTables>();
 
             services.AddSingleton<IPartyManager, PartyManager>();
             services.AddSingleton<PartyCommandEvaluator>();

@@ -60,5 +60,4 @@ namespace DiceRollerCmd
             return "__**" + roll + "**__" +Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(iRoll) + "```";
         }
     }
-    
 }

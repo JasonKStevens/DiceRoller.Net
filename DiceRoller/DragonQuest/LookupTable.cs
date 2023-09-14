@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiceRoller.Heroes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,15 +8,24 @@ namespace DiceRoller.DragonQuest
     public abstract class LookupTable
     {
         protected IDictionary<int, string> Map;
-        protected int MaxRoll = 100;
+
+        public virtual int GetMaxRoll()
+        {
+            return 100;
+        }
+
+        public virtual string GetRoll()
+        {
+            return "d100";
+        }
 
         public string LookupResult(int diceRoll)
         {
             if (Map == null)
                 throw new Exception("Map not defined in lookup table");
 
-            if (diceRoll < 1 || diceRoll > MaxRoll)
-                throw new ArgumentException($"Roll must be between 1 and {MaxRoll} inclusive", nameof(diceRoll));
+            if (diceRoll < 1 || diceRoll > GetMaxRoll())
+                throw new ArgumentException($"Roll must be between 1 and {GetMaxRoll()} inclusive", nameof(diceRoll));
 
             var injuryKeys = Map.Keys.ToList();
 
@@ -41,4 +51,15 @@ namespace DiceRoller.DragonQuest
         }
     }
 
+    public class HerosLookupTables
+    {
+        public readonly SpeedTable Speeds;
+        public readonly LocationTable Locations;
+
+        public HerosLookupTables(SpeedTable speeds, LocationTable locations)
+        {
+            Speeds = speeds;
+            Locations = locations;
+        }
+    }
 }

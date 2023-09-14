@@ -4,10 +4,13 @@ namespace DiceRoller.DragonQuest
 {
     public class FearResult : LookupTable
     {
+        public override int GetMaxRoll()
+        {
+            return 200;
+        }
+
         public FearResult()
         {
-            MaxRoll = 200;
-
             Map = new Dictionary<int, string>
             {
                 { 20, "[Wary] - The target will not voluntarily approach the source of their fear. If they are not aware of the source they will be very cautious and seek to optimise safety." },
