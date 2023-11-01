@@ -172,6 +172,8 @@ namespace DiscordRollerBot
                     {
                         response = content + ": " + ex.Message;
                         _logger.LogError(ex, processor.Prefix);
+                        await e.Message.RespondAsync(user.DisplayName + ": " + response);
+
                         break;
                     }
                 }

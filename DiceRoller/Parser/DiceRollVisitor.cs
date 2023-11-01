@@ -156,7 +156,7 @@ namespace DiceRoller.Parser
             var rightNode = Visit(node.ChildNodes[3]);
 
             var value = operation(leftNode.Value, rightNode.Value);
-            var rankedText = new TypedResult(){ NodeType = NodeType.Min};
+            var rankedText = new TypedResult(){ NodeType = NodeType.Min, Text = value.ToString()};
             rankedText.SubText.Add(leftNode.TypedResult);
             rankedText.SubText.Add(rightNode.TypedResult);
 
@@ -173,7 +173,7 @@ namespace DiceRoller.Parser
 
             var result = _stepEvalFunc((int) stepValue.Value);
 
-            var rankedText = new TypedResult(){ NodeType = NodeType.StepFunc};
+            var rankedText = new TypedResult(){ NodeType = NodeType.StepFunc, Text = result.Value.ToString()};
             rankedText.SubText.Add(result.TypedResult);
 
 

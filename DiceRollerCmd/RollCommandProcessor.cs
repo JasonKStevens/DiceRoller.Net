@@ -14,6 +14,8 @@ namespace DiceRollerCmd
     public class RollCommandProcessor : ICommandProcessor
     {
         public string Prefix => "!roll";
+        public List<string> Prefixes = new List<string>() {"!roll", "/roll"};
+        public List<string> TypePrefixes = new List<string>() {"!repeat", "/repeat"};
 
         private readonly DiceRollEvaluator _evaluator;
         private readonly GrievousInjuries _injuries;

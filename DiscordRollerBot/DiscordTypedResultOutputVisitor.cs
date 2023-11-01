@@ -48,6 +48,8 @@ namespace DiscordRollerBot
                 case NodeType.DiceRollTotal:
                     if (( depth != _maxDepth ) && ( result.SubText.Where(x => x.NodeType != NodeType.Comment).Count() > 1 ))
                         output.Append("[" + VisitSubTexts(result.SubText, depth + 1, ", ") + "]");
+                    else
+                        output.Append(result.Text);
                     break;
                 case NodeType.Operator:
                     if (( depth == _maxDepth ) || ( !result.SubText.Any() )) 
@@ -66,6 +68,18 @@ namespace DiscordRollerBot
                         output.Append(result.Text);
                     else
                         output.Append("```styl" + Environment.NewLine + VisitSubTexts(result.SubText, depth + 1, " - ") + "```");
+                    break;
+                case NodeType.StepFunc:
+                    if (( depth != _maxDepth ) && ( result.SubText.Where(x => x.NodeType != NodeType.Comment).Count() > 0 ))
+                        output.Append("[" + VisitSubTexts(result.SubText, depth + 1, ", ") + "]");
+                    else
+                        output.Append(result.Text);
+                    break;
+                case NodeType.Min:
+                    if (( depth != _maxDepth ) && ( result.SubText.Where(x => x.NodeType != NodeType.Comment).Count() > 0 ))
+                        output.Append("[" + VisitSubTexts(result.SubText, depth + 1, ", ") + "]");
+                    else
+                        output.Append(result.Text);
                     break;
                 case NodeType.None:
                 default:

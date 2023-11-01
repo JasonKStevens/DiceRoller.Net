@@ -37,5 +37,11 @@ namespace DiceRollerCmd
         }
     }
 
+    //public class ServiceStateHost : BackgroundService
+    //{
+    //    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    //    {
 
+    //    }
+    //}
 }
