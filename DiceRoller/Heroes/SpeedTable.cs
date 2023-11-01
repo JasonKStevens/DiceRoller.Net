@@ -5,7 +5,15 @@ namespace DiceRoller.Heroes
 {
     public class SpeedTable : LookupTable
     {
-        protected int MaxRoll = 10;
+        public override int GetMaxRoll()
+        {
+            return 10;
+        }
+
+        public override string GetRoll()
+        {
+            return "1";
+        }
 
         public SpeedTable()
         {

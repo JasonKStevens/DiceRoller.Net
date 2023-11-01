@@ -1,4 +1,5 @@
 using DiceRoller;
+using DiceRoller.Parser;
 using DiscordRollerBot;
 using PartyDSL.Parser;
 using System;
@@ -34,6 +35,21 @@ namespace DiceRollerCmd
                 return (true, result.Value);
 
             return (true, FormatResultNode(userInfo, result));
+        }
+
+        public (bool, TypedResult) ProcessTyped(string userId, string commandText)
+        {
+            if (string.IsNullOrWhiteSpace(commandText)) return (false, TypedResult.Null);
+
+            var tokens = commandText.Split(" ",StringSplitOptions.None);
+            var prefix = tokens[0].ToLower();
+
+            if (( prefix != Prefix ) && ( !_evaluator.HasParty(prefix.Replace("!", "")) ))
+                return (false, TypedResult.Null);
+
+            var result = _evaluator.Evaluate(prefix.Replace("!",""), string.Join(' ', tokens, 1, tokens.Length-1));
+
+            return (true, result.TypedResult);
         }
 
         private string FormatResultNode(DiscordUserInfo user, PartyResultNode node)

@@ -36,7 +36,7 @@ namespace DiscordRollerBot
             _logger.LogInformation("Starting Discord Bot...");
             State = DiscordApiStatus.Starting;
 
-            _client.MessageCreated += HandleMessage;
+            _client.MessageCreated += HandleTypedMessage;
             _logger.LogInformation("Connecting");
             await _client.ConnectAsync();
 
@@ -131,7 +131,98 @@ namespace DiscordRollerBot
             _logger.LogWarning("Message was not handled");
 
             return;
-        } 
+        }
+
+        private async Task HandleTypedMessage(DiscordClient sender, MessageCreateEventArgs e)
+        {
+            if (e.Author.IsCurrent)
+                return;
+
+            _logger.LogInformation($"[{e.Message.MessageType}] ({e.Author}) {e.Message.Content}");
+
+            var content = e.Message.Content.Trim();
+
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                string response = null;
+                bool handled = false;
+                TypedResult rollResult = null;
+
+                string name = e.Author.Username;
+                DiscordMember discordMember = (e.Author as DiscordMember);
+                if (discordMember != null)
+                    name = discordMember.DisplayName;
+
+                var user = new DiscordUserInfo()
+                {
+                    Id = e.Author.Id.ToString(),
+                    DisplayName = name
+                };
+
+                foreach (var processor in _commandProcessors)
+                {
+                    try
+                    {
+                        (handled, rollResult) = processor.ProcessTyped(user.Id, content);
+
+                        if (handled)
+                            break;
+                    }
+                    catch (Exception ex)
+                    {
+                        response = content + ": " + ex.Message;
+                        _logger.LogError(ex, processor.Prefix);
+                        break;
+                    }
+                }
+
+                if (handled && rollResult == TypedResult.Null)
+                    response = "Unrecognised command prefix";
+
+                if (rollResult != null)
+                {
+                    //visit the rollResult and build the output text
+                    var outputBuilder = new DiscordTypedResultOutputVisitor(10);
+                    response = outputBuilder.Visit(rollResult,1);
+
+                    //check for lucky numbers, if applicable
+
+                    if (!response.Contains("```"))
+                    {
+                        var luckyNums = new List<int>();
+                        var nickname = discordMember?.Nickname ?? e.Author.Username;
+                        if (nickname.Contains('[', ']'))
+                        {
+                            var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.IndexOf(']') - nickname.IndexOf('[') - 1);
+                            var nums = luckynums.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var num in nums)
+                            {
+                                if (Int32.TryParse(GetNumbers(num), out int value))
+                                {
+                                    luckyNums.Add(value);
+                                }
+                            }
+                        }
+
+                        foreach (var num in luckyNums)
+                        {
+                            response = response.Replace($"[{num},", $"[:sparkles:{num},");
+                            response = response.Replace($" {num},", $" :sparkles:{num},");
+                            response = response.Replace($" {num}]", $" :sparkles:{num}]");
+                            response = response.Replace($"[{num}]", $"[:sparkles:{num}]");
+                        }
+                    }
+
+                    await e.Message.RespondAsync(user.DisplayName + ": " + response);
+                }
+
+                return;
+            }
+
+            _logger.LogWarning("Message was not handled");
+
+            return;
+        }
 
         public async Task<bool> Stop()
         {

@@ -41,8 +41,8 @@ namespace DiceRoller.Parser
             if (syntaxTree.HasErrors())
             {
                 var messages = syntaxTree.ParserMessages.Select(m => m.Message);
-                var detail = string.Join(Environment.NewLine + "- ", messages);
-                var message = $"Parser errors:{Environment.NewLine}- {detail}";
+                var detail = string.Join(Environment.NewLine + " - ", messages);
+                var message = $"Parser errors:{Environment.NewLine} - {detail}";
                 throw new InvalidOperationException(message);
             }
 
@@ -51,7 +51,8 @@ namespace DiceRoller.Parser
             var comments = syntaxTree.Tokens.Where(x => x.Terminal is CommentTerminal).FirstOrDefault();
             if (comments != null)
             {
-                result = new DiceResultNode(result.Value, result.Breakdown + " " + comments.Text);
+                result.TypedResult.SubText.Add(TypedResult.NewSimpleResult(NodeType.Comment, comments.Text));
+                result = new DiceResultNode(result.Value, result.Breakdown + " " + comments.Text, result.TypedResult);
             }
 
             return result;
@@ -64,7 +65,7 @@ namespace DiceRoller.Parser
             var comments = node.Tokens.Where(x => x.Terminal is CommentTerminal).FirstOrDefault();
             if (comments != null)
             {
-                result = new DiceResultNode(result.Value, result.Breakdown + " " + comments.Text);
+                result = new DiceResultNode(result.Value, result.Breakdown + " " + comments.Text, result.TypedResult);
             }
 
             return result;
@@ -77,8 +78,8 @@ namespace DiceRoller.Parser
             if (syntaxTree.HasErrors())
             {
                 var messages = syntaxTree.ParserMessages.Select(m => m.Message);
-                var detail = string.Join(Environment.NewLine + "- ", messages);
-                var message = $"Parser errors:{Environment.NewLine}- {detail}";
+                var detail = string.Join(Environment.NewLine + " - ", messages);
+                var message = $"Parser errors:{Environment.NewLine} - {detail}";
                 throw new InvalidOperationException(message);
             }
 
@@ -105,7 +106,7 @@ namespace DiceRoller.Parser
             var rollDef = _parsedSteps[stepNumber];
             var result = _visitor.Visit(rollDef.TreeNode);
 
-            return new DiceResultNode(result.Value, rollDef.RollDefinition + ": " + result.Breakdown);
+            return new DiceResultNode(result.Value, rollDef.RollDefinition + ": " + result.Breakdown, result.TypedResult);
         }
 
 

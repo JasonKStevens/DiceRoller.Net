@@ -25,7 +25,7 @@ namespace DiceRoller.Parser
             {
                 case "number":
                     var value = Convert.ToSingle(node.Token.Text, CultureInfo.InvariantCulture.NumberFormat);
-                    return new DiceResultNode(value);
+                    return new DiceResultNode(value, value.ToString(),new TypedResult(){NodeType = 0, Text = node.Token.Text});
 
                 case "add":
                     return EvaluateOperation(node, (l, r) => l + r, "+");
@@ -55,7 +55,7 @@ namespace DiceRoller.Parser
                     return EvaluateOperation(node, (l, r) => l > r ? 1 : 0, ">");
 
                 case "min":
-                    return EvaluateFuncOperation(node, (l, r) => (l < r) ? r : l, "min");
+                    return EvaluateMinOperation(node, (l, r) => (l < r) ? r : l, "min");
 
                 case "repeat":
                     return EvaluateRepeatOperation(node);
@@ -93,7 +93,13 @@ namespace DiceRoller.Parser
 
             var value = roll.Sum(r => r.Roll);
             var breakdown = $"[{string.Join(", ", roll.Select(r => r.ToString()))}]";
-            return new DiceResultNode(value, breakdown);
+            var rankedText = new TypedResult
+            {
+                NodeType = NodeType.DiceRollTotal, 
+                Text = value.ToString(), 
+                SubText = roll.Select(r => new TypedResult() {NodeType = NodeType.DiceRoll, Text = r.ToString()}).ToList()
+            };
+            return new DiceResultNode(value, breakdown, rankedText);
         }
 
         private IEnumerable<DiceRoll> RollGenerator(int dice, bool isExploding)
@@ -107,8 +113,12 @@ namespace DiceRoller.Parser
             (var leftNode, var rightNode) = GetBinaryNodes(node);
 
             var value = operation(leftNode?.Value ?? 0, rightNode?.Value ?? 0);
-            return new DiceResultNode(value, $"{leftNode?.Breakdown ?? ""} {symbol} {rightNode?.Breakdown ?? ""}");
+            var rankedText = TypedResult.NewUnnamedTripartComposite(NodeType.Operator, leftNode?.TypedResult, new TypedResult() {NodeType = NodeType.None, Text = symbol}, rightNode?.TypedResult);
+            rankedText.Text = value.ToString();
+
+            return new DiceResultNode(value, $"{leftNode?.Breakdown ?? ""} {symbol} {rightNode?.Breakdown ?? ""}", rankedText);
         }
+
 
         private DiceResultNode EvaluateRepeatOperation(ParseTreeNode node)
         {
@@ -116,32 +126,42 @@ namespace DiceRoller.Parser
             var count = Visit(node.ChildNodes[3]).Value;
 
             var breakdown = new List<string>();
+            var rankedText = new TypedResult(){ NodeType = NodeType.Repeat};
             float total = 0;
             for (int i = 0; i < count; i++)
             {
                 var result = Visit(leftNode);
                 breakdown.Add(result.Breakdown);
+                rankedText.SubText.Add(result.TypedResult);
                 total += result.Value;
             }
+            rankedText.Text = total.ToString();
 
-            return new DiceResultNode(total, "(" + String.Join(", ", breakdown.ToArray()) + ")");
+            return new DiceResultNode(total, "(" + String.Join(", ", breakdown.ToArray()) + ")", rankedText);
         }
 
         private DiceResultNode Generate(LookupTable lookupTable)
         {
             var diceRoll = RollGenerator(100, isExploding: false).First();
             var injury = lookupTable.LookupResult(diceRoll.Roll);
-            return new DiceResultNode(diceRoll.Roll, injury);
+
+            var rankedText = TypedResult.NewSimpleResult(NodeType.Lookup, injury);
+
+            return new DiceResultNode(diceRoll.Roll, injury, rankedText);
         }
 
-        private DiceResultNode EvaluateFuncOperation(ParseTreeNode node, Func<float, float, float> operation, string symbol)
+        private DiceResultNode EvaluateMinOperation(ParseTreeNode node, Func<float, float, float> operation, string symbol)
         {
             var leftNode = Visit(node.ChildNodes[1]);
             var rightNode = Visit(node.ChildNodes[3]);
 
             var value = operation(leftNode.Value, rightNode.Value);
-            
-            return new DiceResultNode(value, $"{symbol}({leftNode.Breakdown}, {rightNode.Breakdown}) => **{value}**");
+            var rankedText = new TypedResult(){ NodeType = NodeType.Min};
+            rankedText.SubText.Add(leftNode.TypedResult);
+            rankedText.SubText.Add(rightNode.TypedResult);
+
+
+            return new DiceResultNode(value, $"{symbol}({leftNode.Breakdown}, {rightNode.Breakdown}) => **{value}**", rankedText);
         }
 
 
@@ -153,8 +173,12 @@ namespace DiceRoller.Parser
 
             var result = _stepEvalFunc((int) stepValue.Value);
 
-           
-            return new DiceResultNode(result.Value, $"{result.Breakdown}");
+            var rankedText = new TypedResult(){ NodeType = NodeType.StepFunc};
+            rankedText.SubText.Add(result.TypedResult);
+
+
+
+            return new DiceResultNode(result.Value, $"{result.Breakdown}", rankedText);
         }        
 
         private (DiceResultNode left, DiceResultNode right) GetBinaryNodes(ParseTreeNode node)

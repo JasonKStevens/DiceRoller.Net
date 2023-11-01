@@ -1,4 +1,5 @@
 using DiceRoller;
+using DiceRoller.Parser;
 
 namespace DiscordRollerBot
 {
@@ -6,5 +7,6 @@ namespace DiscordRollerBot
     {
         string Prefix { get; }
         (bool, string) Process(DiscordUserInfo userInfo, string commandText);
+        (bool, TypedResult) ProcessTyped(string userId, string commandText);
     }
 }
