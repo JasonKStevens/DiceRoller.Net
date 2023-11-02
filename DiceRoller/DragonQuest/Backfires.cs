@@ -65,7 +65,7 @@ namespace DiceRoller.DragonQuest
                 { 96, "Partial Amnesia causes the loss of all Magical abilities for D10 days." },
                 { 97, "Partial Amnesia causes the loss of all Skills (excluding Magic and Weapons) for D10 days." },
                 { 98, "Partial Amnesia causes the loss of all memories from the past 2D10 months. The Adept will operate at lower ranks in the abilities that have been ranked during this period. The memories will return at a rate of 1 month each day." },
-                { 99, "Total Amnesia causes the loss of all memories for D5 × D5 days. All magic and skills other than the primary language will be lost, and all weapon ranks will be halved (round down) or lost if NodeType 0. The Adept’s original personality will come to the fore and they may need to make a reaction roll to determine their initial feelings towards each person." },
+                { 99, "Total Amnesia causes the loss of all memories for D5 × D5 days. All magic and skills other than the primary language will be lost, and all weapon ranks will be halved (round down) or lost if Rank 0. The Adept’s original personality will come to the fore and they may need to make a reaction roll to determine their initial feelings towards each person." },
                 { 100, "Roll two more times and apply both effects." },
             };
         }
