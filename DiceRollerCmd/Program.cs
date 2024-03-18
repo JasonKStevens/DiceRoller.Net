@@ -20,18 +20,17 @@ namespace DiceRollerCmd
 {
     class Program
     {
-        static IServiceCollection _services;
-        
         static async Task Main(string[] args)
         {
             using IHost host = Host
                                 .CreateDefaultBuilder()
+                                //.ConfigureWebHostDefaults()
                                 .ConfigureHostConfiguration(configHost =>
                                 {
                                     configHost.SetBasePath(Directory.GetCurrentDirectory());
                                     configHost.AddJsonFile("appsettings.json", optional: false);
                                 })
-                                .ConfigureLogging(logging => {
+                               .ConfigureLogging(logging => {
                                     logging.AddConsole().SetMinimumLevel(LogLevel.Information);
                                 })
                                 .ConfigureServices(ConfigureServices)
@@ -42,8 +41,6 @@ namespace DiceRollerCmd
 
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
-            _services = services;
-
             var botConfig = new DiscordApiConfiguration();
             context.Configuration.Bind("BotConfig", botConfig);
             services.AddSingleton(botConfig);

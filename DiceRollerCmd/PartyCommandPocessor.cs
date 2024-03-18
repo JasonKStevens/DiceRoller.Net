@@ -11,6 +11,7 @@ namespace DiceRollerCmd
     public class PartyCommandPocessor : ICommandProcessor
     {
         public string Prefix => "!party";
+        public List<string> Prefixes = new List<string>() {"!party", "\\party"};
 
         public readonly PartyCommandEvaluator _evaluator;
 
@@ -26,7 +27,7 @@ namespace DiceRollerCmd
             var tokens = commandText.Split(" ",StringSplitOptions.None);
             var prefix = tokens[0].ToLower();
 
-            if ((prefix != Prefix) && (!_evaluator.HasParty(prefix.Replace("!",""))))
+            if (!Prefixes.Contains(prefix) && (!_evaluator.HasParty(prefix.Replace("!",""))))
                 return (false, string.Empty);
 
             var result = _evaluator.Evaluate(prefix.Replace("!",""), string.Join(' ', tokens, 1, tokens.Length-1));
@@ -44,7 +45,7 @@ namespace DiceRollerCmd
             var tokens = commandText.Split(" ",StringSplitOptions.None);
             var prefix = tokens[0].ToLower();
 
-            if (( prefix != Prefix ) && ( !_evaluator.HasParty(prefix.Replace("!", "")) ))
+            if (!Prefixes.Contains(prefix) && ( !_evaluator.HasParty(prefix.Replace("!", "")) ))
                 return (false, TypedResult.Null);
 
             var result = _evaluator.Evaluate(prefix.Replace("!",""), string.Join(' ', tokens, 1, tokens.Length-1));

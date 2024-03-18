@@ -40,7 +40,8 @@ namespace DiceRoller.Parser
         Min,
         Text,
         StepFunc,
-        Comment
+        Comment,
+        StepFuncDef
     }
 
     public class TypedResult

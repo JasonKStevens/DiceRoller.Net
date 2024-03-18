@@ -27,12 +27,13 @@ namespace DiceRollerCmd
                 sb.AppendLine("'injury' command will generate a Specific Grevious Injury result");
                 sb.AppendLine("'fear' command will generate a Fear result");
                 sb.AppendLine("'backfire' command will generate a Backfire result");
+                sb.AppendLine("'hitloc [bodyType]_[aimZone]' command will generate a hit location for the bodyType and aiming zone: [humanoid/quadruped/avian/serpent]_[high/mid/low/legs]");
                 sb.AppendLine("'help' command will show this help");
                 sb.AppendLine("");
                 sb.AppendLine("Aliases");
                 sb.AppendLine(" 'addalias' will allow you to define an alias for dice rolls. Syntax: !roll addalias <name> <instructions>. e.g. !roll addalias percentile d100.");
-                sb.AppendLine("'removealias' or 'deletealias' to delete an alias. Syntax: !roll removealias <name>. e.g. !roll deletealias percentile.");
-                sb.AppendLine("'listalias' to see your aliases. Syntax: !roll listalias");
+                sb.AppendLine(" 'removealias' or 'deletealias' to delete an alias. Syntax: !roll removealias <name>. e.g. !roll deletealias percentile.");
+                sb.AppendLine(" 'listalias' to see your aliases. Syntax: !roll listalias");
                 sb.AppendLine("");
                 sb.AppendLine("!dq injury <number> - lookup a Specific Grevious Injury result");
                 sb.AppendLine("!dq fear <number> - lookup a Fear result");

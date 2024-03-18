@@ -228,7 +228,7 @@ namespace DiscordRollerBot
 
         public async Task<bool> Stop()
         {
-            _logger.LogInformation("Starting Discord Bot...");
+            _logger.LogInformation("Stopping Discord Bot...");
 
             State = DiscordApiStatus.Stopping;
 

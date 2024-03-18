@@ -8,7 +8,7 @@ namespace PartyDSL.Parser
         public string Breakdown { get; private set; }
         public TypedResult TypedResult { get; set; } = new TypedResult();
 
-        public PartyResultNode(string value) : this(value, value.ToString())
+        public PartyResultNode(string value) : this("", "", DiceRoller.Parser.TypedResult.NewSimpleResult(NodeType.Text, value))
         {
         }
 

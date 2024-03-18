@@ -14,8 +14,8 @@ namespace DiceRollerCmd
     public class RollCommandProcessor : ICommandProcessor
     {
         public string Prefix => "!roll";
-        public List<string> Prefixes = new List<string>() {"!roll", "/roll"};
-        public List<string> TypePrefixes = new List<string>() {"!repeat", "/repeat"};
+        public List<string> Prefixes = new List<string>() {"!roll", "\\roll"};
+        public List<string> TypePrefixes = new List<string>() {"!repeat", "\\repeat"};
 
         private readonly DiceRollEvaluator _evaluator;
         private readonly GrievousInjuries _injuries;
@@ -23,16 +23,38 @@ namespace DiceRollerCmd
         private readonly FearResult _fears;
         private readonly UserAliases _aliases = new UserAliases();
         private readonly SpeedTable _speeds;
-        private readonly LocationTable _locations;
+        private readonly Dictionary<string, LookupTable> _locations;
 
-        public RollCommandProcessor(DiceRollEvaluator evaluator,  DQLookupTables dqTables, HerosLookupTables heroesTables)
+        public RollCommandProcessor(DiceRollEvaluator evaluator, DQLookupTables dqTables, HerosLookupTables heroesTables)
         {
             _evaluator = evaluator;
             _injuries = dqTables.Injuries;
             _backfires = dqTables.Backfires;
             _fears = dqTables.Fear;
             _speeds = heroesTables.Speeds;
-            _locations = heroesTables.Locations;
+            _locations = new Dictionary<string, LookupTable>(); 
+            AddLookupTable(new HumanoidHighLocationsTable(), "humanoid_high", "hh");
+            AddLookupTable(new HumanoidArmsLocationsTable(), "humanoid_arms", "ha");
+            AddLookupTable(new HumanoidMidLocationsTable(), "humanoid_mid", "hm");
+            AddLookupTable(new HumanoidLegsLocationsTable(), "humanoid_legs", "hl");
+            AddLookupTable(new QuadrupedHighLocationsTable(), "quadruped_high", "qh");
+            AddLookupTable(new QuadrupedMidLocationsTable(), "quadruped_mid", "qm");
+            AddLookupTable(new QuadrupedLowLocationsTable(), "quadruped_low", "ql");
+            AddLookupTable(new AvianHighLocationsTable(), "avian_high", "ah");
+            AddLookupTable(new AvianMidLocationsTable(), "avian_mid", "am");
+            AddLookupTable(new AvianLowLocationsTable(), "avian_low", "al");
+            AddLookupTable(new SerpentineHighLocationsTable(), "serpent_high", "sh");
+            AddLookupTable(new SerpentineMidLocationsTable(), "serpent_mid", "sm");
+            AddLookupTable(new SerpentineLowLocationsTable(), "serpent_low", "sl");
+
+        }
+
+        private void AddLookupTable(LookupTable table, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                _locations.Add(name, table);
+            }
         }
 
         
@@ -42,7 +64,7 @@ namespace DiceRollerCmd
 
             var tokens = commandText.Split(" ",StringSplitOptions.None);
 
-            if (!tokens[0].Equals(Prefix,StringComparison.InvariantCultureIgnoreCase))
+            if (!Prefixes.Contains(tokens[0]))
                 return (false, null);
 
             string aliasName;
@@ -74,7 +96,39 @@ namespace DiceRollerCmd
 
                 case "hitlocation":
                 case "hitloc":
-                    return (true, GenerateResult(_locations, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length - 2) : ""));
+                    //test for presence of a body-type
+
+                    var bodyType = "humanoid_mid";
+                    var roll = "";
+
+                    if (tokens.Length > 2)
+                    {
+                        string token;
+                        token = tokens[2].ToLower();
+                        if (int.TryParse(token, out var i))
+                        {
+                            roll = i.ToString();
+                        }
+                        else
+                        {
+                            bodyType = token;
+                        }
+
+                        if (tokens.Length > 3)
+                        {
+                            token = tokens[3].ToLower();
+                            if (int.TryParse(token, out var i2))
+                            {
+                                roll = i.ToString();
+                            }
+                            else
+                            {
+                                bodyType = token;
+                            }
+                        }
+                    }
+
+                    return (true, GenerateLocationResult(roll, bodyType));
 
                 case "addalias":
                     if (tokens.Length < 4)
@@ -166,13 +220,28 @@ namespace DiceRollerCmd
             return "__**" + Emotify(roll) + "**__" + Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(roll) + "```";
         }
 
+        private string GenerateLocationResult(string instructions, string bodyType)
+        {
+            if (!_locations.ContainsKey(bodyType))
+                return $"Unknown location body type: '{bodyType}'";
+
+            var table = _locations[bodyType];
+
+            if (string.IsNullOrWhiteSpace(instructions))
+                instructions = table.GetRoll();
+
+            int roll = ( int ) _evaluator.Evaluate(instructions).Value;
+
+            return "__**" + Emotify(roll) + "**__" + Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(roll) + "```";
+        }
+
         public (bool, TypedResult) ProcessTyped(string userId, string commandText)
         {
             if (string.IsNullOrWhiteSpace(commandText)) return (false, TypedResult.Null);
 
             var tokens = commandText.Split(" ",StringSplitOptions.None);
 
-            if (!tokens[0].Equals(Prefix, StringComparison.InvariantCultureIgnoreCase))
+            if (!Prefixes.Contains(tokens[0]))
                 return (false, null);
 
             string aliasName;
@@ -203,7 +272,39 @@ namespace DiceRollerCmd
 
                 case "hitlocation":
                 case "hitloc":
-                    return (true, GenerateTypedResult(_locations, tokens.Length > 2 ? string.Join(' ', tokens, 2, tokens.Length - 2) : ""));
+                    //test for presence of a body-type
+
+                    var bodyType = "humanoid_mid";
+                    var roll = "";
+
+                    if (tokens.Length > 2)
+                    {
+                        string token;
+                        token = tokens[2].ToLower();
+                        if (int.TryParse(token, out var i))
+                        {
+                            roll = i.ToString();
+                        }
+                        else
+                        {
+                            bodyType = token;
+                        }
+
+                        if (tokens.Length > 3)
+                        {
+                            token = tokens[3].ToLower();
+                            if (int.TryParse(token, out var i2))
+                            {
+                                roll = i2.ToString();
+                            }
+                            else
+                            {
+                                bodyType = token;
+                            }
+                        }
+                    }
+
+                    return (true, GenerateTypedLocationResult(roll, bodyType));
 
                 case "addalias":
                     if (tokens.Length < 4)
@@ -263,7 +364,26 @@ namespace DiceRollerCmd
 
             return typedResult;
         }
+
+        private TypedResult GenerateTypedLocationResult(string rollInstruction, string bodyType)
+        {
+            if (!_locations.ContainsKey(bodyType))
+                return TypedResult.NewSimpleResult($"Unknown body type: '{bodyType}'");
+
+            var table = _locations[bodyType];
+
+            if (string.IsNullOrWhiteSpace(rollInstruction))
+                rollInstruction = table.GetRoll();
+
+            int roll = ( int ) _evaluator.Evaluate(rollInstruction).Value;
+
+            var typedResult = new TypedResult(){ NodeType = NodeType.Lookup, Text = roll.ToString()};
+            typedResult.SubText.Add(TypedResult.NewSimpleResult(NodeType.DiceRoll, roll.ToString()));
+            typedResult.SubText.Add(TypedResult.NewSimpleResult(NodeType.None, table.LookupResult(roll)));
+
+            return typedResult;
+        }
     }
 
-    
+
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DiceRoller;
 using DiceRoller.DragonQuest;
 using DiceRoller.Parser;
@@ -8,14 +9,17 @@ namespace DiceRollerCmd
 {
     public class DQCommandProcessor : ICommandProcessor
     {
+        private readonly DiceRollEvaluator _evaluator;
         public string Prefix => "!dq";
+        public List<string> Prefixes = new List<string>() {"!dq", "\\dq"};
 
         private readonly GrievousInjuries _injuries;
         private readonly Backfires _backfires;
         private readonly FearResult _fears;
 
-        public DQCommandProcessor(DQLookupTables tables)
+        public DQCommandProcessor(DiceRollEvaluator evaluator, DQLookupTables tables)
         {
+            _evaluator = evaluator;
             _injuries = tables.Injuries;
             _backfires = tables.Backfires;
             _fears = tables.Fear;
@@ -28,7 +32,7 @@ namespace DiceRollerCmd
 
             var tokens = commandText.Split(" ",StringSplitOptions.None);
 
-            if (!tokens[0].Equals(Prefix,StringComparison.InvariantCultureIgnoreCase))
+            if (!Prefixes.Contains(tokens[0]))
                 return (false, null);
 
             //what are we dealing with
@@ -58,7 +62,7 @@ namespace DiceRollerCmd
 
             var tokens = commandText.Split(" ",StringSplitOptions.None);
 
-            if (!tokens[0].Equals(Prefix, StringComparison.InvariantCultureIgnoreCase))
+            if (!Prefixes.Contains(tokens[0]))
                 return (false, null);
 
             //what are we dealing with
@@ -82,24 +86,26 @@ namespace DiceRollerCmd
             }
         }
 
-        private string LookupResult(LookupTable table, string roll)
+        private string LookupResult(LookupTable table, string instruction)
         {
-            if (string.IsNullOrWhiteSpace(roll))
-                return "No roll was specified!";
+            if (string.IsNullOrWhiteSpace(instruction))
+                instruction = table.GetRoll();
+
+            int roll = ( int ) _evaluator.Evaluate(instruction).Value;
 
             int iRoll = Convert.ToInt32(roll);
             return "__**" + roll + "**__" +Environment.NewLine + "```styl" + Environment.NewLine + table.LookupResult(iRoll) + "```";
         }
 
-        private TypedResult LookupTypedResult(LookupTable table, string roll)
+        private TypedResult LookupTypedResult(LookupTable table, string instruction)
         {
-            if (string.IsNullOrWhiteSpace(roll))
-                return TypedResult.NewSimpleResult("No roll was specified!");
+            if (string.IsNullOrWhiteSpace(instruction))
+                instruction = table.GetRoll();
 
-            int iRoll = Convert.ToInt32(roll);
+            int iRoll = ( int ) _evaluator.Evaluate(instruction).Value;
 
-            var typedResult = new TypedResult(){ NodeType = NodeType.Lookup, Text = roll};
-            typedResult.SubText.Add(TypedResult.NewSimpleResult(NodeType.DiceRoll, roll));
+            var typedResult = new TypedResult(){ NodeType = NodeType.Lookup, Text = iRoll.ToString()};
+            typedResult.SubText.Add(TypedResult.NewSimpleResult(NodeType.DiceRoll, iRoll.ToString()));
             typedResult.SubText.Add(TypedResult.NewSimpleResult(NodeType.None, table.LookupResult(iRoll)));
 
             return typedResult;

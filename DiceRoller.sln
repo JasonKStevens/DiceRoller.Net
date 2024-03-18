@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiceRoller", "DiceRoller\DiceRoller.csproj", "{7147239E-0026-4217-88A2-27EFD7E2283B}"
 EndProject
@@ -16,11 +16,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordRollerBot", "Discord
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiceRollerCmd", "DiceRollerCmd\DiceRollerCmd.csproj", "{E9AB060A-4B59-4BCC-AE56-6C563979A16E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceRoller.Repl", "DiceRoller.Repl\DiceRoller.Repl.csproj", "{F8FBD916-E798-4001-8769-BB3771C933CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiceRoller.Repl", "DiceRoller.Repl\DiceRoller.Repl.csproj", "{F8FBD916-E798-4001-8769-BB3771C933CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PartyDSL", "PartyDSL\PartyDSL.csproj", "{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PartyDSL", "PartyDSL\PartyDSL.csproj", "{FFDD10CE-BB41-4A60-B504-BAF9BA32493A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PartyDSL.Test", "PartyDSL.Test\PartyDSL.Test.csproj", "{F081D260-F9CA-40EF-867B-CB3D037D51BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PartyDSL.Test", "PartyDSL.Test\PartyDSL.Test.csproj", "{F081D260-F9CA-40EF-867B-CB3D037D51BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceRollerWebApi", "DiceRollerWebApi\DiceRollerWebApi.csproj", "{8A57F5C3-4CE2-4B31-9E9A-73FC5A55A74C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F081D260-F9CA-40EF-867B-CB3D037D51BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A57F5C3-4CE2-4B31-9E9A-73FC5A55A74C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A57F5C3-4CE2-4B31-9E9A-73FC5A55A74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A57F5C3-4CE2-4B31-9E9A-73FC5A55A74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A57F5C3-4CE2-4B31-9E9A-73FC5A55A74C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -105,6 +105,7 @@ namespace DiceRoller.Parser
 
             var rollDef = _parsedSteps[stepNumber];
             var result = _visitor.Visit(rollDef.TreeNode);
+            result.TypedResult.SubText.Insert(0, TypedResult.NewSimpleResult(NodeType.StepFuncDef,rollDef.RollDefinition));
 
             return new DiceResultNode(result.Value, rollDef.RollDefinition + ": " + result.Breakdown, result.TypedResult);
         }

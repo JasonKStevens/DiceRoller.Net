@@ -7,7 +7,7 @@ namespace DiceRoller.Heroes
     {
         public override int GetMaxRoll()
         {
-            return 10;
+            return 12;
         }
 
         public override string GetRoll()

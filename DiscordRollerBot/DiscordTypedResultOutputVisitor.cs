@@ -71,7 +71,7 @@ namespace DiscordRollerBot
                     break;
                 case NodeType.StepFunc:
                     if (( depth != _maxDepth ) && ( result.SubText.Where(x => x.NodeType != NodeType.Comment).Count() > 0 ))
-                        output.Append("[" + VisitSubTexts(result.SubText, depth + 1, ", ") + "]");
+                        output.Append(VisitSubTexts(result.SubText, depth + 1, ", "));
                     else
                         output.Append(result.Text);
                     break;
@@ -135,6 +135,14 @@ namespace DiscordRollerBot
             foreach (var subText in results)
             {
                 if (subText.NodeType == NodeType.Comment) continue;
+                if (subText.NodeType == NodeType.StepFuncDef)
+                {
+                    result.Append(DiscordFormattingStrings.Italicize(Visit(subText, depth)));
+                    result.Append(" -> ");
+
+                    continue;
+                }
+
                 result.Append(Visit(subText, depth));
                 result.Append(separator);
             }
@@ -180,5 +188,6 @@ namespace DiscordRollerBot
     public static class DiscordFormattingStrings
     {
         public static string EmphasizeValue(string value) => $" **__[{value}]__** ";
+        public static string Italicize(string value) => $" *{value}* ";
     }
 }
