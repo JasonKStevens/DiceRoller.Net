@@ -22,7 +22,29 @@ namespace DiscordRollerBot
         private readonly IEnumerable<ICommandProcessor> _commandProcessors;
 
         private const string ButtonPrefix = "button_";
-        private static readonly List<DiscordButtonComponent[]> buttons = new List<DiscordButtonComponent[]>()
+        private static readonly List<DiscordSelectComponentOption> hitLocationOptions =
+            new List<DiscordSelectComponentOption>()
+            {
+                new DiscordSelectComponentOption("Hit location", "hitloc_", isDefault: true),
+                new DiscordSelectComponentOption("Human mid", "hitloc_humanoid_mid"),
+                new DiscordSelectComponentOption("Human high", "hitloc_humanoid_high"),
+                new DiscordSelectComponentOption("Human arms", "hitloc_humanoid_arms"),
+                new DiscordSelectComponentOption("Human legs", "hitloc_humanoid_legs"),
+
+                new DiscordSelectComponentOption("Quadruped mid", "hitloc_quadruped_mid"),
+                new DiscordSelectComponentOption("Quadruped high", "hitloc_quadruped_high"),
+                new DiscordSelectComponentOption("Quadruped low", "hitloc_quadruped_low"),
+
+                new DiscordSelectComponentOption("Avian mid", "hitloc_avian_mid"),
+                new DiscordSelectComponentOption("Avian high", "hitloc_avian_high"),
+                new DiscordSelectComponentOption("Avian low", "hitloc_avian_low"),
+
+                new DiscordSelectComponentOption("Serpent mid", "hitloc_serpent_mid"),
+                new DiscordSelectComponentOption("Serpent high", "hitloc_serpent_high"),
+                new DiscordSelectComponentOption("Serpent low", "hitloc_serpent_low"),
+            };
+
+        private static readonly List<DiscordComponent[]> buttons = new List<DiscordComponent[]>()
         {
             new DiscordButtonComponent[]
             {
@@ -32,12 +54,8 @@ namespace DiscordRollerBot
                 new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d6",   "d6"),
                 new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d4",   "d4"),
             },
-            new DiscordButtonComponent[]
-            {
-                new DiscordButtonComponent(ButtonStyle.Primary, $"{ButtonPrefix}hitloc", "HitLoc Humanoid"),
-                new DiscordButtonComponent(ButtonStyle.Primary, $"{ButtonPrefix}hitloc quadruped_mid", "HitLoc Quadruped"),
-                new DiscordButtonComponent(ButtonStyle.Primary, $"{ButtonPrefix}hitloc avian_mid", "HitLoc Avian"),
-                new DiscordButtonComponent(ButtonStyle.Primary, $"{ButtonPrefix}hitloc serpent_mid", "HitLoc Serpentine"),
+            new DiscordComponent[] {
+                new DiscordSelectComponent($"{ButtonPrefix}hitloc", null,hitLocationOptions,false,1,1),
             },
             new DiscordButtonComponent[]
             {
@@ -191,12 +209,19 @@ namespace DiscordRollerBot
 
         private async Task HandleInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
         {
-            var buttonCommand = $"!roll {e.Id.Substring(ButtonPrefix.Length)}"; 
+            var id = e.Id.Substring(ButtonPrefix.Length);
+            var buttonCommand = $"{id}";
 
-            var response = GetResponse(e.User, buttonCommand);
+            if (id == "hitloc")
+            {
+                var loc = e.Values[0].Substring("hitloc_".Length);
+                buttonCommand += $" {loc}";
+            }
+
+            var response = GetResponse(e.User, $"!roll {buttonCommand}");
 
             var builder = new DiscordInteractionResponseBuilder();
-            builder.WithContent(e.User.Username + ": " + e.Id.Substring(ButtonPrefix.Length) + Environment.NewLine + response);
+            builder.WithContent(e.User.Username + ": " + buttonCommand + Environment.NewLine + response);
 
             foreach (var buttonList in buttons)
             {
