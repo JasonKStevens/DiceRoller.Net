@@ -71,7 +71,7 @@ namespace DiceRollerCmd
 
             if (tokens.Length < 2)
             {
-                var tkns = new List<string>(tokens) {"3d6"};
+                var tkns = new List<string>(tokens) {"d100"};
                 tokens = tkns.ToArray();
             }
 

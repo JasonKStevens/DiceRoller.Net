@@ -48,11 +48,11 @@ namespace DiscordRollerBot
         {
             new DiscordButtonComponent[]
             {
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d100", "d100"),
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d20",  "d20"),
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d10",  "d10"),
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d6",   "d6"),
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonPrefix}d4",   "d4"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d100", "d100"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d20",  "d20"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d10",  "d10"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d8",   "d8"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d6",   "d6"),
             },
             new DiscordComponent[] {
                 new DiscordSelectComponent($"{ButtonPrefix}hitloc", null,hitLocationOptions,false,1,1),
@@ -220,15 +220,26 @@ namespace DiscordRollerBot
 
             var response = GetResponse(e.User, $"!roll {buttonCommand}");
 
-            var builder = new DiscordInteractionResponseBuilder();
-            builder.WithContent(e.User.Username + ": " + buttonCommand + Environment.NewLine + response);
+            var userName = e.User.Username;
+            if (e.User is DiscordMember)
+            {
+                if (!string.IsNullOrWhiteSpace((e.User as DiscordMember).Nickname))
+                    userName = ( e.User as DiscordMember ).Nickname;
+            }
+
+
+            var builder = new DiscordMessageBuilder();
 
             foreach (var buttonList in buttons)
             {
                 builder.AddComponents(buttonList);
             }
+            builder.WithContent($"{userName}: !roll {buttonCommand}->{response}");
 
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+            await builder.SendAsync(e.Channel);
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            
+            //await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
         }
 
         public async Task<bool> Stop()
