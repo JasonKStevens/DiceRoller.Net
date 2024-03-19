@@ -27,7 +27,7 @@ namespace DiceRollerCmd
                 sb.AppendLine("'injury' generate a Specific Grevious Injury result");
                 sb.AppendLine("'fear' generate a Fear result");
                 sb.AppendLine("'backfire' generate a Backfire result");
-                sb.AppendLine("'hitloc [bodyType]_[aimZone]' generate a hit location for the bodyType and aiming zone: [humanoid/quadruped/avian/serpent]_[high/mid/low/legs]");
+                sb.AppendLine("'hitloc [bodyType]_[aimZone]' generate a hit location for the bodyType and aiming zone: [humanoid/quadruped/avian/serpent]_[high/mid/low/legs/arms]");
                 sb.AppendLine("'help' command will show this help");
                 sb.AppendLine("");
                 sb.AppendLine("Aliases");
