@@ -19,24 +19,6 @@ namespace DiceRollerCmd
             _evaluator = evaluator;
         }
 
-        public (bool, string) Process(DiscordUserInfo userInfo, string commandText)
-        {
-            if (string.IsNullOrWhiteSpace(commandText)) return (false, string.Empty);
- 
-            var tokens = commandText.Split(" ",StringSplitOptions.None);
-            var prefix = tokens[0].ToLower();
-
-            if ((prefix != Prefix) && (!_evaluator.HasParty(prefix.Replace("!",""))))
-                return (false, string.Empty);
-
-            var result = _evaluator.Evaluate(prefix.Replace("!",""), string.Join(' ', tokens, 1, tokens.Length-1));
-
-            if (result.Value.Contains("```"))
-                return (true, result.Value);
-
-            return (true, FormatResultNode(userInfo, result));
-        }
-
         public (bool, TypedResult) ProcessTyped(string userId, string commandText)
         {
             if (string.IsNullOrWhiteSpace(commandText)) return (false, TypedResult.Null);
@@ -51,28 +33,6 @@ namespace DiceRollerCmd
 
             return (true, result.TypedResult);
         }
-
-        private string FormatResultNode(DiscordUserInfo user, PartyResultNode node)
-        {
-            var builder = new StringBuilder();
-            builder.Append("```llvm" +Environment.NewLine + node.Value + "```");
-            return builder.ToString();        
-        }
-
-        private string Emotify(string value)
-        {
-            return value
-                    .Replace("0", ":zero:")
-                    .Replace("1", ":one:")
-                    .Replace("2", ":two:")
-                    .Replace("3", ":three:")
-                    .Replace("4", ":four:")
-                    .Replace("5", ":five:")
-                    .Replace("6", ":six:")
-                    .Replace("7", ":seven:")
-                    .Replace("8", ":eight:")
-                    .Replace("9", ":nine:");
-        }        
     }
 
 }

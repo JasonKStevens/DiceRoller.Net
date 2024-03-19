@@ -8,18 +8,26 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordRollerBot
 {
-    public class DiscordApi : IDiscordApi    
+    public class DiscordApi : IDiscordApi
     {
         private readonly DiscordClient _client;
         private readonly DiscordApiConfiguration _config;
         private readonly ILogger<DiscordApi> _logger;
 
         private readonly IEnumerable<ICommandProcessor> _commandProcessors;
+
+        private const string ButtonPrefix = "button_";
+        private static readonly DiscordButtonComponent[] buttons = new []
+        {
+            new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}specgrev", "Spec Griev"),
+            new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}backfire", "Backfire"),
+            new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}fear", "Fear"),
+            new DiscordButtonComponent(ButtonStyle.Primary, $"{ButtonPrefix}hitlocation", "Hit Location"),
+        };
 
         public DiscordApi(DiscordClient client, DiscordApiConfiguration config, IEnumerable<ICommandProcessor> commandProcessors, ILogger<DiscordApi> logger = null)
         {
@@ -43,94 +51,14 @@ namespace DiscordRollerBot
             State = DiscordApiStatus.Started;
             _logger.LogInformation("Started...");
 
+            _client.ComponentInteractionCreated += HandleInteraction;
+
             return await Task.FromResult(true);
         }
 
         private static string GetNumbers(string input)
         {
             return new string(input.Where(c => char.IsDigit(c)).ToArray());
-        }
-
-        private async Task HandleMessage(DiscordClient sender, MessageCreateEventArgs e)
-        {
-            if (e.Author.IsCurrent)
-                return;
-
-            _logger.LogInformation($"[{e.Message.MessageType}] ({e.Author}) {e.Message.Content}");
-            
-            var content = e.Message.Content.Trim();
-
-            if (!string.IsNullOrWhiteSpace(content))
-            {
-                string response = null;
-                bool handled = false;
-
-                string name = e.Author.Username;
-                DiscordMember discordMember = (e.Author as DiscordMember);
-                if (discordMember != null)
-                    name = discordMember.DisplayName;
-
-                var user = new DiscordUserInfo(){
-                    Id = e.Author.Id.ToString(),
-                    DisplayName = name
-                };
-
-                foreach (var processor in _commandProcessors)
-                {
-                    try
-                    {
-                        (handled, response) = processor.Process(user, content);
-
-                        if (handled)
-                            break;
-                    } catch (Exception ex)
-                    {
-                        response = content + ": " + ex.Message;
-                        _logger.LogError(ex, processor.Prefix);
-                        break;
-                    }
-                }
-
-                if (handled && response==null)
-                    response  = "Unrecognised command prefix";
-
-                if (response != null)
-                {
-                    if (!response.Contains("```"))
-                    {
-                        var luckyNums = new List<int>();
-                        var nickname = discordMember?.Nickname ?? e.Author.Username;
-                        if (nickname.Contains('[', ']'))
-                        {
-                            var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.IndexOf(']') - nickname.IndexOf('[') - 1);
-                            var nums = luckynums.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                            foreach (var num in nums)
-                            {
-                                if (Int32.TryParse(GetNumbers(num), out int value))
-                                {
-                                    luckyNums.Add(value);
-                                }
-                            }
-                        }
-
-                        foreach (var num in luckyNums)
-                        {
-                            response = response.Replace($"[{num},", $"[:sparkles:{num},");
-                            response = response.Replace($" {num},", $" :sparkles:{num},");
-                            response = response.Replace($" {num}]", $" :sparkles:{num}]");
-                            response = response.Replace($"[{num}]", $"[:sparkles:{num}]");
-                        }
-                    }
-
-                    await e.Message.RespondAsync(user.DisplayName + ": " + response);
-                }
-
-                return;
-            }
-
-            _logger.LogWarning("Message was not handled");
-
-            return;
         }
 
         private async Task HandleTypedMessage(DiscordClient sender, MessageCreateEventArgs e)
@@ -142,93 +70,129 @@ namespace DiscordRollerBot
 
             var content = e.Message.Content.Trim();
 
-            if (!string.IsNullOrWhiteSpace(content))
+            if (string.IsNullOrWhiteSpace(content))
             {
-                string response = null;
-                bool handled = false;
-                TypedResult rollResult = null;
-
-                string name = e.Author.Username;
-                DiscordMember discordMember = (e.Author as DiscordMember);
-                if (discordMember != null)
-                    name = discordMember.DisplayName;
-
-                var user = new DiscordUserInfo()
-                {
-                    Id = e.Author.Id.ToString(),
-                    DisplayName = name
-                };
-
-                foreach (var processor in _commandProcessors)
-                {
-                    try
-                    {
-                        (handled, rollResult) = processor.ProcessTyped(user.Id, content);
-
-                        if (handled)
-                            break;
-                    }
-                    catch (Exception ex)
-                    {
-                        response = content + ": " + ex.Message;
-                        _logger.LogError(ex, processor.Prefix);
-                        await e.Message.RespondAsync(user.DisplayName + ": " + response);
-
-                        break;
-                    }
-                }
-
-                if (handled && rollResult == TypedResult.Null)
-                    response = "Unrecognised command prefix";
-
-                if (rollResult != null)
-                {
-                    //visit the rollResult and build the output text
-                    var outputBuilder = new DiscordTypedResultOutputVisitor(10);
-                    response = outputBuilder.Visit(rollResult,1);
-
-                    //check for lucky numbers, if applicable
-
-                    if (!response.Contains("```"))
-                    {
-                        var luckyNums = new List<int>();
-                        var nickname = discordMember?.Nickname ?? e.Author.Username;
-                        if (nickname.Contains('[', ']'))
-                        {
-                            var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.IndexOf(']') - nickname.IndexOf('[') - 1);
-                            var nums = luckynums.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                            foreach (var num in nums)
-                            {
-                                if (Int32.TryParse(GetNumbers(num), out int value))
-                                {
-                                    luckyNums.Add(value);
-                                }
-                            }
-                        }
-
-                        foreach (var num in luckyNums)
-                        {
-                            response = response.Replace($"[{num},", $"[:sparkles:{num},");
-                            response = response.Replace($" {num},", $" :sparkles:{num},");
-                            response = response.Replace($" {num}]", $" :sparkles:{num}]");
-                            response = response.Replace($"[{num}]", $"[:sparkles:{num}]");
-                        }
-                    }
-
-                    await e.Message.RespondAsync(user.DisplayName + ": " + response);
-                }
-
+                _logger.LogWarning("Message was not handled");
                 return;
             }
 
-            _logger.LogWarning("Message was not handled");
+            var response = GetResponse(e.Author, content);
 
-            return;
+            if (string.IsNullOrWhiteSpace(response))
+            {
+                _logger.LogWarning("Message was not handled");
+                return;
+            }
+
+            var builder = new DiscordMessageBuilder();
+            builder.WithContent(response);
+
+            foreach (var button in buttons)
+            {
+                builder.AddComponents(button);
+            }
+
+            await e.Message.RespondAsync(builder);
+        }
+
+        private string GetResponse(DiscordUser fromUser, string content)
+        {
+            string response;
+            bool handled = false;
+            TypedResult rollResult = null;
+
+            string name = fromUser.Username;
+            DiscordMember discordMember = (fromUser as DiscordMember);
+            if (discordMember != null)
+                name = discordMember.DisplayName;
+
+            var user = new DiscordUserInfo()
+            {
+                Id = fromUser.Id.ToString(),
+                DisplayName = name,
+            };
+
+            foreach (var processor in _commandProcessors)
+            {
+                try
+                {
+                    (handled, rollResult) = processor.ProcessTyped(user.Id, content);
+
+                    if (handled)
+                        break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, processor.Prefix);
+
+                    response = content + ": " + ex.Message;
+                    return user.DisplayName + ": " + response;
+                }
+            }
+
+            if (handled && rollResult == TypedResult.Null)
+                return "Unrecognised command prefix";
+
+            if (rollResult == null)
+                return null;
+
+            //visit the rollResult and build the output text
+            var outputBuilder = new DiscordTypedResultOutputVisitor(10);
+            response = outputBuilder.Visit(rollResult, 1);
+
+            //check for lucky numbers, if applicable
+
+            if (!response.Contains("```"))
+            {
+                var luckyNums = new List<int>();
+                var nickname = discordMember?.Nickname ?? name;
+                if (nickname.Contains('[', ']'))
+                {
+                    var luckynums = nickname.Substring(nickname.IndexOf('[')+1, nickname.IndexOf(']') - nickname.IndexOf('[') - 1);
+                    var nums = luckynums.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var num in nums)
+                    {
+                        if (Int32.TryParse(GetNumbers(num), out int value))
+                        {
+                            luckyNums.Add(value);
+                        }
+                    }
+                }
+
+                foreach (var num in luckyNums)
+                {
+                    response = response.Replace($"[{num},", $"[:sparkles:{num},");
+                    response = response.Replace($" {num},", $" :sparkles:{num},");
+                    response = response.Replace($" {num}]", $" :sparkles:{num}]");
+                    response = response.Replace($"[{num}]", $"[:sparkles:{num}]");
+                }
+            }
+
+            return response;
+        }
+
+        private async Task HandleInteraction(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+        {
+            var buttonCommand = $"!roll {e.Id.Substring(ButtonPrefix.Length)}";
+
+            var response = GetResponse(e.User, buttonCommand);
+            
+            var builder = new DiscordInteractionResponseBuilder();
+            builder.WithContent(response);
+
+            foreach (var button in buttons)
+            {
+                builder.AddComponents(button);
+            }
+
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, builder);
         }
 
         public async Task<bool> Stop()
         {
-            _logger.LogInformation("Starting Discord Bot...");
+            _client.ComponentInteractionCreated -= HandleInteraction;
+
+            _logger.LogInformation("Stopping Discord Bot...");
 
             State = DiscordApiStatus.Stopping;
 
