@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -131,15 +132,39 @@ namespace DiscordRollerBot
             }
 
             var builder = new DiscordMessageBuilder();
-            builder.WithContent(response);
-
             AddButtons(e.Author.Id.ToString(), builder);
-            //foreach (var buttonList in buttons)
-            //{
-            //    builder.AddComponents(buttonList);
-            //}
 
-            await e.Message.RespondAsync(builder);
+            if (response.Length < 2000)
+            {
+                builder.WithContent(response);
+                await e.Message.RespondAsync(builder);
+            }
+            else
+            {
+                var fileName = Guid.NewGuid() + ".sav";
+
+                //var data = new S
+                StreamWriter outputFile = new StreamWriter(fileName);
+                try
+                {
+                    await outputFile.WriteAsync(response);
+                    outputFile.Close();
+                    var fs = File.OpenRead(fileName);
+                    try
+                    {
+                        builder.WithFile(fileName, fs);
+                        await e.Message.RespondAsync(builder);
+                    }
+                    finally
+                    {
+                        fs.Close();
+                    }
+                }
+                finally
+                {
+                    File.Delete(fileName);
+                }
+            }
         }
 
         private void AddButtons(string userId, DiscordMessageBuilder builder)
