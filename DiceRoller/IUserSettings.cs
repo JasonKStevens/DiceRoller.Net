@@ -6,6 +6,7 @@ public interface IUserSettings
 {
     string GetUserSetting(string userId, string setting);
     void SaveUserSetting(string userId, string setting, string value);
+    void DeleteUserSetting(string userId, string setting);
 
     Dictionary<string,string> GetUserSettings(string userId);
 }
@@ -36,6 +37,17 @@ public class UserSettings : IUserSettings
         var userSettings = _settings[userId];
         userSettings[setting] = value;
 
+    }
+
+    public void DeleteUserSetting(string userId, string setting)
+    {
+        if (!_settings.ContainsKey(userId))
+        {
+            _settings[userId] = new Dictionary<string, string>();
+        }
+
+        var userSettings = _settings[userId];
+        userSettings.Remove(setting);
     }
 
     public Dictionary<string, string> GetUserSettings(string userId)
