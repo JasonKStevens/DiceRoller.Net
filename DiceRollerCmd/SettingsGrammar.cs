@@ -9,7 +9,7 @@ public class SettingsGrammar : Grammar
     public SettingsGrammar() : base(false)
     {
         // Terminals
-        //var json = new StringLiteral("json", "|", StringOptions.NoEscapes);
+        var json = new StringLiteral("json", "|", StringOptions.NoEscapes);
         //var stringText = new StringLiteral("stringtext");
         var equalSign = ToTerm("=");
         var setTerm = ToTerm("set");
@@ -24,14 +24,18 @@ public class SettingsGrammar : Grammar
         var list = new NonTerminal("list");
         var help = new NonTerminal("help");
         var delete = new NonTerminal("delete");
+        var save = new NonTerminal("save");
+        var load = new NonTerminal("load");
 
 
         equals.Rule = setTerm + stringText + equalSign + stringText;
         list.Rule = new KeyTerm("list","list");
         help.Rule = new KeyTerm("help","help");
         delete.Rule = deleteTerm + stringText;
+        save.Rule = new KeyTerm("save","save");
+        load.Rule = new KeyTerm("load","load") + json;
 
-        expression.Rule = list | help | equals | delete;
+        expression.Rule = list | help | equals | delete | save | load;
 
         Root = expression;
     }

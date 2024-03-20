@@ -20,13 +20,14 @@ namespace DiceRollerCmd
         private readonly GrievousInjuries _injuries;
         private readonly Backfires _backfires;
         private readonly FearResult _fears;
-        private readonly UserAliases _aliases = new UserAliases();
+        private readonly IUserAliases _aliases;
         private readonly SpeedTable _speeds;
         private readonly Dictionary<string, LookupTable> _locations;
 
-        public RollCommandProcessor(DiceRollEvaluator evaluator, DQLookupTables dqTables, HerosLookupTables heroesTables)
+        public RollCommandProcessor(DiceRollEvaluator evaluator, DQLookupTables dqTables, HerosLookupTables heroesTables, IUserAliases aliases)
         {
             _evaluator = evaluator;
+            _aliases = aliases;
             _injuries = dqTables.Injuries;
             _backfires = dqTables.Backfires;
             _fears = dqTables.Fear;
@@ -136,7 +137,7 @@ namespace DiceRollerCmd
                     aliasInstruction = string.Join(' ', tokens, 3, tokens.Length - 3);
                     tree = _evaluator.Parse(aliasInstruction);
 
-                    _aliases.AddUpdate(userId, aliasName, tree);
+                    _aliases.AddUpdate(userId, aliasName, tree, aliasInstruction);
 
                     return (true, TypedResult.NewSimpleResult($"Alias '{aliasName}' added"));
 

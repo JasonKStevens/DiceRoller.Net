@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace DiceRoller;
 
@@ -9,11 +10,14 @@ public interface IUserSettings
     void DeleteUserSetting(string userId, string setting);
 
     Dictionary<string,string> GetUserSettings(string userId);
+
+    string Serialize();
+    void Hydrate(string json);
 }
 
 public class UserSettings : IUserSettings
 {
-    private readonly Dictionary<string,Dictionary<string,string>> _settings = new Dictionary<string,Dictionary<string,string>>();
+    private Dictionary<string,Dictionary<string,string>> _settings = new Dictionary<string,Dictionary<string,string>>();
 
     public string GetUserSetting(string userId, string setting)
     {
@@ -58,5 +62,15 @@ public class UserSettings : IUserSettings
         }
 
         return null;
+    }
+
+    public string Serialize()
+    {
+        return JsonSerializer.Serialize(_settings);
+    }
+
+    public void Hydrate(string json)
+    {
+        _settings = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json);
     }
 }

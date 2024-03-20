@@ -68,6 +68,7 @@ public class Program
         services.AddSingleton<IPartyManager, PartyManager>();
         services.AddSingleton<PartyCommandEvaluator>();
         services.AddSingleton<IUserSettings, UserSettings>();
+        services.AddSingleton<IUserAliases, UserAliases>();
         services.AddSingleton<SettingsCommandEvaluator>();
 
         services.RegisterAllTypes<ICommandProcessor>(new[] { typeof(BotHost).Assembly }, ServiceLifetime.Singleton);

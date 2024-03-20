@@ -7,18 +7,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace DiceRollerCmd;
 
 public class SettingsCommandVisitor
 {
     private readonly string _prefix;
+    private readonly IUserAliases _aliases;
+    private readonly IPartyManager _partyManager;
     private readonly IUserSettings _userSettings;
+    private readonly DiceRollEvaluator _diceRollEvaluator;
 
-    public SettingsCommandVisitor(IUserSettings userSettings, string prefix)
+    public SettingsCommandVisitor(IUserSettings userSettings, string prefix, IUserAliases aliases, IPartyManager partyManager, DiceRollEvaluator diceRollEvaluator)
     {
         _userSettings = userSettings;
         _prefix = prefix;
+        _aliases = aliases;
+        _partyManager = partyManager;
+        _diceRollEvaluator = diceRollEvaluator;
     }
 
     public SettingResultNode Visit(ParseTreeNode node, string userId)
@@ -42,6 +49,26 @@ public class SettingsCommandVisitor
 
                 case "help":
                     return new SettingResultNode(SettingsGrammar.HelpText());
+
+                case "save":
+                    var exportData = new ExportContent()
+                    {
+                        Aliases = _aliases.Serialize(),
+                        UserSettings = _userSettings.Serialize(),
+                        Party = _partyManager.Serialize()
+                    };
+
+                    return new SettingResultNode(JsonSerializer.Serialize(exportData));
+
+                case "load":
+                    var json = node.ChildNodes[1].Token.Text.Replace("|", "");
+                    exportData = JsonSerializer.Deserialize<ExportContent>(json);
+
+                    _aliases.Hydrate(exportData.Aliases,_diceRollEvaluator);
+                    _partyManager.Hydrate(exportData.Party);
+                    _userSettings.Hydrate(exportData.UserSettings);
+
+                    return new SettingResultNode("Loaded successfully");
 
                 case "equals":
                     var settingName = Visit(node.ChildNodes[1], userId).Value;
@@ -71,4 +98,10 @@ public class SettingsCommandVisitor
         throw new InvalidOperationException($"Unrecognizable term '{node.Term.Name}'.");
     }
 
+    public class ExportContent
+    {
+        public string UserSettings { get; set; }
+        public string Party { get; set; }
+        public string Aliases { get; set; }
+    }
 }
