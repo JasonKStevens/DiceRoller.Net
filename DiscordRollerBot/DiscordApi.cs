@@ -18,6 +18,7 @@ namespace DiscordRollerBot
         private readonly DiscordClient _client;
         private readonly DiscordApiConfiguration _config;
         private readonly ILogger<DiscordApi> _logger;
+        private readonly IUserSettings _userSettings;
 
         private readonly IEnumerable<ICommandProcessor> _commandProcessors;
 
@@ -27,49 +28,58 @@ namespace DiscordRollerBot
             {
                 new DiscordSelectComponentOption("Hit location", "hitloc_", isDefault: true),
                 new DiscordSelectComponentOption("Human mid", "hitloc_humanoid_mid"),
+                new DiscordSelectComponentOption("Quadruped mid", "hitloc_quadruped_mid"),
+                new DiscordSelectComponentOption("Avian mid", "hitloc_avian_mid"),
+                new DiscordSelectComponentOption("Serpent mid", "hitloc_serpent_mid"),
+
                 new DiscordSelectComponentOption("Human high", "hitloc_humanoid_high"),
                 new DiscordSelectComponentOption("Human arms", "hitloc_humanoid_arms"),
                 new DiscordSelectComponentOption("Human legs", "hitloc_humanoid_legs"),
 
-                new DiscordSelectComponentOption("Quadruped mid", "hitloc_quadruped_mid"),
                 new DiscordSelectComponentOption("Quadruped high", "hitloc_quadruped_high"),
                 new DiscordSelectComponentOption("Quadruped low", "hitloc_quadruped_low"),
 
-                new DiscordSelectComponentOption("Avian mid", "hitloc_avian_mid"),
                 new DiscordSelectComponentOption("Avian high", "hitloc_avian_high"),
                 new DiscordSelectComponentOption("Avian low", "hitloc_avian_low"),
 
-                new DiscordSelectComponentOption("Serpent mid", "hitloc_serpent_mid"),
                 new DiscordSelectComponentOption("Serpent high", "hitloc_serpent_high"),
                 new DiscordSelectComponentOption("Serpent low", "hitloc_serpent_low"),
             };
 
-        private static readonly List<DiscordComponent[]> buttons = new List<DiscordComponent[]>()
+        private static readonly DiscordButtonComponent[] _diceButtons = new DiscordButtonComponent[]
         {
-            new DiscordButtonComponent[]
-            {
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d100", "d100"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d20",  "d20"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d10",  "d10"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d8",   "d8"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d6",   "d6"),
-            },
-            new DiscordComponent[] {
-                new DiscordSelectComponent($"{ButtonPrefix}hitloc", null,hitLocationOptions,false,1,1),
-            },
-            new DiscordButtonComponent[]
-            {
-                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}specgrev", "Spec Griev"),
-                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}backfire", "Backfire"),
-                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}fear", "Fear"),
-            },
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d100", "d100"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d20", "d20"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d10", "d10"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d8", "d8"),
+            new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonPrefix}d6", "d6"),
         };
 
-        public DiscordApi(DiscordClient client, DiscordApiConfiguration config, IEnumerable<ICommandProcessor> commandProcessors, ILogger<DiscordApi> logger = null)
+        private static readonly DiscordButtonComponent[] _specialsButtons = new DiscordButtonComponent[]
+        {
+            new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}specgrev", "Spec Griev"),
+            new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}backfire", "Backfire"),
+            new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonPrefix}fear", "Fear"),
+        };
+
+        private static readonly DiscordComponent[] _hitLocDropdown = new DiscordComponent[]
+        {
+            new DiscordSelectComponent($"{ButtonPrefix}hitloc", null, hitLocationOptions, false, 1, 1),
+        };
+
+        private static readonly List<DiscordComponent[]> buttons = new List<DiscordComponent[]>()
+        {
+            _diceButtons,
+            _hitLocDropdown,
+            _specialsButtons,
+        };
+
+        public DiscordApi(DiscordClient client, DiscordApiConfiguration config, IEnumerable<ICommandProcessor> commandProcessors, IUserSettings userSettings, ILogger<DiscordApi> logger = null)
         {
             _client = client;
             _config = config;
             _commandProcessors = commandProcessors;
+            _userSettings = userSettings;
             _logger = logger ?? NullLogger<DiscordApi>.Instance;
         }
 
@@ -123,12 +133,39 @@ namespace DiscordRollerBot
             var builder = new DiscordMessageBuilder();
             builder.WithContent(response);
 
-            foreach (var buttonList in buttons)
-            {
-                builder.AddComponents(buttonList);
-            }
+            AddButtons(e.Author.Id.ToString(), builder);
+            //foreach (var buttonList in buttons)
+            //{
+            //    builder.AddComponents(buttonList);
+            //}
 
             await e.Message.RespondAsync(builder);
+        }
+
+        private void AddButtons(string userId, DiscordMessageBuilder builder)
+        {
+            var showDiceButtons = true;
+            var showHitLocations = true;
+            var showSpecialButtons = true;
+
+            if (!string.IsNullOrWhiteSpace(_userSettings.GetUserSetting(userId, "showDiceButtons")))
+            {
+                bool.TryParse(_userSettings.GetUserSetting(userId, "showDiceButtons"), out showDiceButtons);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_userSettings.GetUserSetting(userId, "showHitLocations")))
+            {
+                bool.TryParse(_userSettings.GetUserSetting(userId, "showHitLocations"), out showHitLocations);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_userSettings.GetUserSetting(userId, "showSpecialButtons")))
+            {
+                bool.TryParse(_userSettings.GetUserSetting(userId, "showSpecialButtons"), out showSpecialButtons);
+            }
+
+            if (showDiceButtons) builder.AddComponents(_diceButtons);
+            if (showHitLocations) builder.AddComponents(_hitLocDropdown);
+            if (showSpecialButtons) builder.AddComponents(_specialsButtons);
         }
 
         private string GetResponse(DiscordUser fromUser, string content)
@@ -230,10 +267,11 @@ namespace DiscordRollerBot
 
             var builder = new DiscordMessageBuilder();
 
-            foreach (var buttonList in buttons)
-            {
-                builder.AddComponents(buttonList);
-            }
+            AddButtons(e.User.Id.ToString(), builder);
+            //foreach (var buttonList in buttons)
+            //{
+            //    builder.AddComponents(buttonList);
+            //}
             builder.WithContent($"{userName}: !roll {buttonCommand}->{response}");
 
             await builder.SendAsync(e.Channel);

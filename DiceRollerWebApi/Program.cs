@@ -1,3 +1,4 @@
+using DiceRoller;
 using DiceRoller.Dice;
 using DiceRoller.DragonQuest;
 using DiceRoller.Heroes;
@@ -66,6 +67,8 @@ public class Program
 
         services.AddSingleton<IPartyManager, PartyManager>();
         services.AddSingleton<PartyCommandEvaluator>();
+        services.AddSingleton<IUserSettings, UserSettings>();
+        services.AddSingleton<SettingsCommandEvaluator>();
 
         services.RegisterAllTypes<ICommandProcessor>(new[] { typeof(BotHost).Assembly }, ServiceLifetime.Singleton);
 
