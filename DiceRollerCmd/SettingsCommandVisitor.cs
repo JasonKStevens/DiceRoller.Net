@@ -29,25 +29,37 @@ public class SettingsCommandVisitor
             {
                 case "list":
                     var settings = _userSettings.GetUserSettings(userId);
-                    if (settings==null) return new SettingResultNode("User has no settings");
+                    if (settings == null) return new SettingResultNode("User has no settings");
 
                     StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("User Settings:");
                     foreach (var setting in settings)
                     {
-                        sb.AppendLine($"{setting.Key}={setting.Value}");
+                        sb.AppendLine($"    {setting.Key}={setting.Value}");
                     }
 
                     return new SettingResultNode(sb.ToString());
 
+                case "help":
+                    return new SettingResultNode(SettingsGrammar.HelpText());
+
                 case "equals":
-                    var settingName = Visit(node.ChildNodes[0], userId).Value;
-                    var settingValue = Visit(node.ChildNodes[2], userId).Value;
+                    var settingName = Visit(node.ChildNodes[1], userId).Value;
+                    var settingValue = Visit(node.ChildNodes[3], userId).Value;
 
                     if (settingName == null)
                         return new SettingResultNode("Setting not specified");
 
                     _userSettings.SaveUserSetting(userId, settingName, settingValue);
                     return new SettingResultNode("Setting saved");
+                case "delete":
+                    settingName = Visit(node.ChildNodes[1], userId).Value;
+
+                    if (settingName == null)
+                        return new SettingResultNode("Setting not specified");
+
+                    _userSettings.DeleteUserSetting(userId, settingName);
+                    return new SettingResultNode("Setting deleted");
                 case "stringtext":
                     return new SettingResultNode(node.Token.Text);
 

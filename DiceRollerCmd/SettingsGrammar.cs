@@ -10,18 +10,28 @@ public class SettingsGrammar : Grammar
     {
         // Terminals
         //var json = new StringLiteral("json", "|", StringOptions.NoEscapes);
-        var stringText = new RegexBasedTerminal("stringtext", @"[\w\.\-]+");
+        //var stringText = new StringLiteral("stringtext");
         var equalSign = ToTerm("=");
+        var setTerm = ToTerm("set");
+        var deleteTerm = ToTerm("delete");
 
 
         // Nonterminals
-        var list = new NonTerminal("list");
         var expression = new NonTerminal("expression");
-        var equals = new NonTerminal("equals");
 
-        equals.Rule = stringText + equalSign + stringText;
-        list.Rule = ToTerm("list") | Empty | stringText;
-        expression.Rule = equals | list | Empty;
+        var stringText = new IdentifierTerminal("stringtext");
+        var equals = new NonTerminal("equals");
+        var list = new NonTerminal("list");
+        var help = new NonTerminal("help");
+        var delete = new NonTerminal("delete");
+
+
+        equals.Rule = setTerm + stringText + equalSign + stringText;
+        list.Rule = new KeyTerm("list","list");
+        help.Rule = new KeyTerm("help","help");
+        delete.Rule = deleteTerm + stringText;
+
+        expression.Rule = list | help | equals | delete;
 
         Root = expression;
     }
@@ -34,41 +44,23 @@ public class SettingsGrammar : Grammar
         var sb = new StringBuilder();
         sb.AppendLine("");
         sb.AppendLine("```llvm");
-        sb.AppendLine("!Party usage:");
+        sb.AppendLine("!settings usage:");
         sb.AppendLine("");
 
-        sb.AppendLine("!party create <name>");
-        sb.AppendLine("Creates a party with the given <name>.");
+        sb.AppendLine("!settings list");
+        sb.AppendLine("Lists all settings.");
         sb.AppendLine("");
-        sb.AppendLine("!party list");
-        sb.AppendLine("Lists all parties.");
+        sb.AppendLine("!settings delete <name>");
+        sb.AppendLine("Deletes the setting <name>");
         sb.AppendLine("");
-        sb.AppendLine("!party delete <name>");
-        sb.AppendLine("Delete the party with the given <name>.");
+        sb.AppendLine("!settings set <name>=<value>");
+        sb.AppendLine("Sets the <value> of a specific setting <name>");
         sb.AppendLine("");
-
-        sb.AppendLine("!<partyName> add <memberName>");
-        sb.AppendLine("Adds a new member to the party.");
-        sb.AppendLine("");
-
-        sb.AppendLine("!<partyName> add <memberName> as an ally of <masterName>");
-        sb.AppendLine("Adds a new ally to the party that belongs to the master.");
-        sb.AppendLine("");
-
-        sb.AppendLine("!<partyName> set <rollName> for <memberName> to <rollDefinition>");
-        sb.AppendLine("Configures a named roll for the member in the party.");
-        sb.AppendLine("");
-
-        sb.AppendLine("!<partyName> roll <rollName>");
-        sb.AppendLine("Executes the named roll for each party member, returning in descending order. This is currently configured for doing INITIATIVE in dq, so agents will have their rolls adjusted.");
-        sb.AppendLine("");
-
-        sb.AppendLine("!<partyName> show members");
-        sb.AppendLine("Lists the members of the party.");
-        sb.AppendLine("");
-
-        sb.AppendLine("!<partyName> show last <rollName>");
-        sb.AppendLine("Shows the last roll by the party for the specific roll name.");
+        sb.AppendLine("The following settings can be used to turn off various parts of the buttons displayed with messages (per user):");
+        sb.AppendLine("  showDiceButtons=false");
+        sb.AppendLine("  showHitLocations=false");
+        sb.AppendLine("  showSpecialButtons=false");
+        sb.AppendLine("    -  this will hide the Spec Griev etc buttons");
 
         sb.AppendLine("```");
 
