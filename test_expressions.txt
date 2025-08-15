@@ -1,0 +1,9 @@
+1d6 + + 2
+1d6 * / 2
+step 0
+step -1
+repeat(d6, -1)
+1/0
+1d0
+1d-6
+quit

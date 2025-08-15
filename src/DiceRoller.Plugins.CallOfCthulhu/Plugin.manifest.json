@@ -1,0 +1,36 @@
+{
+  "id": "callofcthulhu",
+  "name": "Call of Cthulhu Game System",
+  "version": "1.0.0",
+  "description": "Provides Call of Cthulhu RPG game system support including sanity checks, luck rolls, and madness tables.",
+  "author": "DiceRoller.Net Team",
+  "website": "https://github.com/diceroller-net/plugins",
+  "license": "MIT",
+  "tags": ["rpg", "cthulhu", "horror", "chaosium"],
+  "minimumHostVersion": "1.0.0",
+  "assemblyFileName": "DiceRoller.Plugins.CallOfCthulhu.dll",
+  "pluginTypeName": "DiceRoller.Plugins.CallOfCthulhu.CallOfCthulhuPlugin",
+  "interfaces": [
+    "IPlugin",
+    "IGameSystemPlugin"
+  ],
+  "configurationSchema": "{}",
+  "defaultConfiguration": {
+    "enableSanityLoss": true,
+    "enableMadnessEffects": true,
+    "defaultSanityLossMultiplier": 1.0,
+    "enableLuckReplenishment": false
+  },
+  "resourceRequirements": {
+    "maxMemoryMB": 50,
+    "maxCpuPercent": 10,
+    "executionTimeoutSeconds": 30
+  },
+  "permissions": [],
+  "isEnabled": true,
+  "loadOnStartup": true,
+  "installationSource": {
+    "type": "local",
+    "installationMethod": "builtin"
+  }
+}

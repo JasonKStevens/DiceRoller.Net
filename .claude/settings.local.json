@@ -1,0 +1,196 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(move:*)",
+      "Bash(mv:*)",
+      "Bash(dotnet build)",
+      "Bash(dotnet build:*)",
+      "Bash(git add:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(cat:*)",
+      "Bash(git commit:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet test:*)",
+      "Bash(csc:*)",
+      "Bash(debug_test.exe)",
+      "WebFetch(domain:www.assemblyai.com)",
+      "Bash(gh repo list:*)",
+      "Bash(echo $APPDATA)",
+      "Bash(compgen -c)",
+      "Bash(docker:*)",
+      "Bash(npx:*)",
+      "Bash(ls:*)",
+      "Bash(env)",
+      "Bash(powershell:*)",
+      "Bash(curl:*)",
+      "mcp__github__search_repositories",
+      "mcp__microsoft-docs__microsoft_docs_search",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(dir)",
+      "mcp__filesystem__directory_tree",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__read_multiple_files",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(git checkout:*)",
+      "mcp__filesystem__search_files",
+      "mcp__filesystem__create_directory",
+      "mcp__filesystem__write_file",
+      "mcp__filesystem__get_file_info",
+      "Bash(rg:*)",
+      "Bash(taskkill:*)",
+      "Bash(dotnet clean:*)",
+      "mcp__filesystem__edit_file",
+      "Bash(dotnet add:*)",
+      "Bash(del:*)",
+      "mcp__filesystem__move_file",
+      "Bash(timeout 30 dotnet build TranscriptionMerger.sln)",
+      "Bash(timeout 20 dotnet build TranscriptionMerger.Infrastructure)",
+      "Bash(timeout:*)",
+      "Bash(git reset:*)",
+      "Bash(touch:*)",
+      "Bash(csharp -help)",
+      "mcp__filesystem__list_allowed_directories",
+      "mcp__voice-mode__check_room_status",
+      "mcp__voice-mode__listen_for_speech",
+      "mcp__voice-mode__check_audio_devices",
+      "mcp__voice-mode__ask_voice_question",
+      "Bash(tasklist)",
+      "mcp__voice-mode__voice_status",
+      "mcp__voice-mode__converse",
+      "mcp__voice-mode__service",
+      "mcp__voice-mode__list_config_keys",
+      "mcp__voice-mode__refresh_provider_registry",
+      "mcp__voice-mode__voice_registry",
+      "mcp__voice-mode__voice_mode_info",
+      "mcp__voice-mode__update_config",
+      "mcp__voice-mode__check_audio_dependencies",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(dir:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(playwright install:*)",
+      "Bash(pwsh:*)",
+      "Bash(cp:*)",
+      "Bash(set GLADIA_API_KEY=test-api-key)",
+      "Bash(set ASSEMBLYAI_API_KEY=test-api-key)",
+      "Bash(if exist nul del nul)",
+      "Bash(if [ -f nul ])",
+      "Bash(then rm nul)",
+      "Bash(fi)",
+      "WebFetch(domain:github.com)",
+      "Bash(uvx run:*)",
+      "Bash(uvx:*)",
+      "Bash(uv run:*)",
+      "mcp__refactor__ListToolsCommand",
+      "mcp__ElevenLabs__text_to_speech",
+      "mcp__ElevenLabs__play_audio",
+      "mcp__ElevenLabs__search_voices",
+      "Bash(diff:*)",
+      "Bash(npm search:*)",
+      "WebSearch"
+    ],
+    "deny": []
+  },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [
+    "filesystem",
+    "github",
+    "microsoft-docs",
+    "sequential-thinking"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/pre_tool_use.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/post_tool_use.py"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/notification.py --notify"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/stop.py --chat"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/subagent_stop.py"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/user_prompt_submit.py --log-only"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/pre_compact.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/session_start.py"
+          }
+        ]
+      }
+    ]
+  }
+}

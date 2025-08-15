@@ -8,6 +8,6 @@ services:
     container_name: diceroller.net
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/Dockerfile
     environment: 
       - BotConfig__Token=${BotConfig__Token}

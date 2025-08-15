@@ -10,7 +10,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: 'DiceRoller.sln'
+  solution: 'src/DiceRoller.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   BotConfig.Token: '$(discord-token)'
@@ -29,7 +29,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
-    projects: 'DiceRollerCmd/DiceRollerCmd.csproj'
+    projects: 'src/DiceRoller.Bot/DiceRoller.Bot.csproj'
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     modifyOutputPath: true
     zipAfterPublish: false

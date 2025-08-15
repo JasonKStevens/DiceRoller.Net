@@ -7,6 +7,6 @@ services:
     image: dicerollercmd
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/Dockerfile
     volumes:
       - ~/.vsdbg:/remote_debugger:rw

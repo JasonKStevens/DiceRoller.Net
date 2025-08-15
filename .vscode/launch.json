@@ -2,15 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "DiceRoller Bot",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/DiceRollerCmd/bin/Debug/netcoreapp3.1/DiceRollerCmd.dll",
+            "program": "${workspaceFolder}/src/DiceRoller.Bot/bin/Debug/net8.0/DiceRoller.Bot.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/DiceRollerCmd",
+            "cwd": "${workspaceFolder}/src/DiceRoller.Bot",
             "console": "internalConsole",
-            "stopAtEntry": false
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
         },
         {
             "name": ".NET Core Attach",

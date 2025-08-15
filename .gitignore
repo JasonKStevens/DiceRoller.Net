@@ -349,3 +349,12 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Test and temporary files
+TestBot.ps1
+UnregisterFunctionTest/
+plugins/
+src/DiceRoller.Bot/MinimalProgram.cs
+src/DiceRoller.Bot/NonBlockingPluginManagerService.cs
+src/DiceRoller.Bot/TestHostedService.cs
+test_unregister_function.cs

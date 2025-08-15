@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/DiceRollerCmd/DiceRollerCmd.csproj",
+                "${workspaceFolder}/src/DiceRoller.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
