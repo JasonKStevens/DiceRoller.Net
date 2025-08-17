@@ -34,6 +34,17 @@ namespace DiceRollerCmd
     {
         static async Task Main(string[] args)
         {
+            // Check for help arguments before any initialization
+            if (args.Length > 0 && 
+                (args[0].Equals("--help", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("-h", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("/?", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("help", StringComparison.OrdinalIgnoreCase)))
+            {
+                DisplayHelp();
+                return;
+            }
+            
             Console.WriteLine("Starting DiceRoller.Bot...");
             
             // Check if Bot__Token is in process environment, if not, try to load from system
@@ -267,6 +278,93 @@ namespace DiceRollerCmd
             services.AddHostedService<SlashCommandRegistrationService>();  // Then register commands
             Console.WriteLine("[DI] Added SlashCommandRegistrationService");
             Console.WriteLine("[DI] ConfigureServices completed");
+        }
+
+        private static void DisplayHelp()
+        {
+            Console.WriteLine("DiceRoller.Bot - Discord Dice Rolling Bot");
+            Console.WriteLine("Version: .NET 8.0");
+            Console.WriteLine();
+            Console.WriteLine("DESCRIPTION:");
+            Console.WriteLine("  A sophisticated Discord bot for dice rolling with support for complex expressions,");
+            Console.WriteLine("  game system commands, user aliases, and plugin-based extensions. Features an");
+            Console.WriteLine("  intelligent Progressive Disclosure system that adapts output formatting based");
+            Console.WriteLine("  on expression complexity.");
+            Console.WriteLine();
+            Console.WriteLine("USAGE:");
+            Console.WriteLine("  dotnet run [options]");
+            Console.WriteLine("  DiceRoller.Bot.exe [options]");
+            Console.WriteLine();
+            Console.WriteLine("OPTIONS:");
+            Console.WriteLine("  --help, -h, /?, help    Show this help message");
+            Console.WriteLine();
+            Console.WriteLine("CONFIGURATION:");
+            Console.WriteLine("  The bot requires a Discord bot token to function. Configure using any of these methods:");
+            Console.WriteLine();
+            Console.WriteLine("  1. Environment Variable (Recommended):");
+            Console.WriteLine("     Windows (PowerShell): $env:Bot__Token = \"your-bot-token-here\"");
+            Console.WriteLine("     Windows (CMD):        set Bot__Token=your-bot-token-here");
+            Console.WriteLine("     Linux/macOS:          export Bot__Token=\"your-bot-token-here\"");
+            Console.WriteLine();
+            Console.WriteLine("  2. Command Line:");
+            Console.WriteLine("     dotnet run --Bot:Token=\"your-bot-token-here\"");
+            Console.WriteLine();
+            Console.WriteLine("  3. Configuration File:");
+            Console.WriteLine("     Edit appsettings.json and set the 'Bot.Token' field");
+            Console.WriteLine();
+            Console.WriteLine("  Additional configuration options are available in appsettings.json for:");
+            Console.WriteLine("  - Logging levels and categories");
+            Console.WriteLine("  - Plugin discovery and loading settings");
+            Console.WriteLine("  - Security and performance options");
+            Console.WriteLine();
+            Console.WriteLine("DISCORD COMMANDS:");
+            Console.WriteLine("  Once the bot is running and connected to Discord, users can use these slash commands:");
+            Console.WriteLine();
+            Console.WriteLine("  /roll <dice>           - Roll dice expressions (e.g., 3d6+5, d20!, repeat(d6,4))");
+            Console.WriteLine("  /rollhelp              - Show comprehensive dice notation help");
+            Console.WriteLine("  /dq <command>          - DragonQuest game system commands (backfire, injury, etc.)");
+            Console.WriteLine("  /heroes <command>      - Heroes game system commands (speed, hitloc)");
+            Console.WriteLine("  /plugin <action>       - Plugin management (list, info, reload)");
+            Console.WriteLine();
+            Console.WriteLine("SUPPORTED DICE NOTATION:");
+            Console.WriteLine("  - Basic dice: d20, 3d6, 4d8+2");
+            Console.WriteLine("  - Arithmetic: (2d8 + 3) * 2, d12 - 1");
+            Console.WriteLine("  - Exploding dice: 3d6!, d10!!");
+            Console.WriteLine("  - Functions: min(d10-4, 1), max(3d6, 10), repeat(d20, 5)");
+            Console.WriteLine("  - Comments: d20+5 # Attack roll");
+            Console.WriteLine("  - Comparisons: 3d6 > 10, d20 >= 15");
+            Console.WriteLine("  - Complex: repeat(min(3d6!+2, 20), 4) + (4d10! > 30) * 10");
+            Console.WriteLine();
+            Console.WriteLine("EXAMPLES:");
+            Console.WriteLine("  # Start the bot with environment variable");
+            Console.WriteLine("  $env:Bot__Token = \"your-discord-bot-token\"");
+            Console.WriteLine("  dotnet run --project src/DiceRoller.Bot");
+            Console.WriteLine();
+            Console.WriteLine("  # Start with command line token");
+            Console.WriteLine("  dotnet run --project src/DiceRoller.Bot --Bot:Token=\"your-token\"");
+            Console.WriteLine();
+            Console.WriteLine("  # Run from compiled executable");
+            Console.WriteLine("  DiceRoller.Bot.exe");
+            Console.WriteLine();
+            Console.WriteLine("GETTING STARTED:");
+            Console.WriteLine("  1. Create a Discord application and bot at https://discord.com/developers/applications");
+            Console.WriteLine("  2. Copy the bot token and configure it using one of the methods above");
+            Console.WriteLine("  3. Invite the bot to your Discord server with the 'applications.commands' scope");
+            Console.WriteLine("  4. Run the bot using one of the examples above");
+            Console.WriteLine("  5. Use /rollhelp in Discord for comprehensive dice notation documentation");
+            Console.WriteLine();
+            Console.WriteLine("DOCUMENTATION:");
+            Console.WriteLine("  For detailed setup instructions, see: README.md");
+            Console.WriteLine("  For configuration details, see: CONFIGURATION.md");
+            Console.WriteLine("  For architecture information, see: ARCHITECTURE.md");
+            Console.WriteLine();
+            Console.WriteLine("FEATURES:");
+            Console.WriteLine("  - Progressive Disclosure with 5 verbosity and complexity levels");
+            Console.WriteLine("  - Interactive Discord buttons for re-roll, details, and copy");
+            Console.WriteLine("  - Plugin system for extensible game systems and functions");
+            Console.WriteLine("  - User aliases and party management");
+            Console.WriteLine("  - Comprehensive error handling and validation");
+            Console.WriteLine("  - Smart output truncation for Discord's 2000-character limit");
         }
     }
 }

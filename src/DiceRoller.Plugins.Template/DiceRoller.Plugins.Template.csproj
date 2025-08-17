@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Title>DiceRoller Template Plugin</Title>
+    <Authors>Your Name</Authors>
+    <Description>A template plugin for creating DiceRoller.Net game system plugins</Description>
+    <Copyright>Copyright © Your Name 2025</Copyright>
+    <PackageProjectUrl>https://github.com/yourusername/diceroller-plugin-template</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>diceroller;plugin;template;rpg;tabletop</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference to the plugin infrastructure -->
+    <ProjectReference Include="..\DiceRoller.Plugins.Infrastructure\DiceRoller.Plugins.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensure manifest is copied to output directory -->
+    <None Include="Plugin.manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Optional: Copy additional resources -->
+  <ItemGroup>
+    <None Include="README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="DEVELOPMENT.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

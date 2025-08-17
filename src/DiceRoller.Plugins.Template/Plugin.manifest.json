@@ -1,0 +1,36 @@
+{
+  "id": "template",
+  "name": "Template Game System",
+  "version": "1.0.0",
+  "description": "A template plugin for creating DiceRoller.Net game system plugins. Provides examples of commands, tables, and game mechanics.",
+  "author": "Your Name",
+  "website": "https://github.com/yourusername/diceroller-plugin-template",
+  "license": "MIT",
+  "tags": ["template", "example", "rpg", "generic"],
+  "minimumHostVersion": "1.0.0",
+  "assemblyFileName": "DiceRoller.Plugins.Template.dll",
+  "pluginTypeName": "DiceRoller.Plugins.Template.TemplatePlugin",
+  "interfaces": [
+    "IPlugin",
+    "IGameSystemPlugin"
+  ],
+  "configurationSchema": "{}",
+  "defaultConfiguration": {
+    "enableExampleFeatures": true,
+    "defaultDifficulty": "normal",
+    "maxTableEntries": 100,
+    "enableAdvancedLogging": false
+  },
+  "resourceRequirements": {
+    "maxMemoryMB": 50,
+    "maxCpuPercent": 10,
+    "executionTimeoutSeconds": 30
+  },
+  "permissions": [],
+  "isEnabled": true,
+  "loadOnStartup": true,
+  "installationSource": {
+    "type": "local",
+    "installationMethod": "manual"
+  }
+}
