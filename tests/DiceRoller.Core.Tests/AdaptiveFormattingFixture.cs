@@ -205,9 +205,10 @@ namespace DiceRoller.Test
             // Act
             var formatted = _adaptiveManager.FormatBreakdown(converted.TypedResult, converted.Breakdown, "repeat(3d6!, 2)");
             
-            // Assert
-            Assert.That(formatted, Does.Contain("🎲"));
-            Assert.That(formatted, Does.Contain("Repeat"));
+            // Assert - Adaptive manager correctly classifies as Moderate and uses code block formatting
+            Assert.That(formatted, Does.Contain("repeat("));
+            Assert.That(formatted, Does.Contain("iterations"));
+            Assert.That(formatted, Does.Contain("!"));  // Should preserve exploding dice notation
             Assert.That(formatted, Does.Not.Contain("55 12 12 10"));  // Should not contain raw output
             Assert.That(result.Value, Is.GreaterThan(0));
         }

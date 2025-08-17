@@ -10,12 +10,14 @@ public class NodeTypeFormatters
 {
     private readonly TreeStructureFormatter _treeFormatter;
     private readonly BreakdownTextParser _textParser;
+    private readonly DetailPreservingFormatter _detailFormatter;
     private Action<TypedResult, StringBuilder, string, bool, string>? _formatNodeCallback;
 
     public NodeTypeFormatters(TreeStructureFormatter treeFormatter, BreakdownTextParser textParser)
     {
         _treeFormatter = treeFormatter ?? throw new ArgumentNullException(nameof(treeFormatter));
         _textParser = textParser ?? throw new ArgumentNullException(nameof(textParser));
+        _detailFormatter = new DetailPreservingFormatter(_textParser);
     }
 
     /// <summary>
@@ -34,7 +36,7 @@ public class NodeTypeFormatters
         var iterationsCount = _textParser.ExtractIterationsCount(fullBreakdown);
         sb.AppendLine(_treeFormatter.FormatTreeNode(currentPrefix, $"Repeat {iterationsCount} times"));
         
-        // Format sub-nodes as iterations
+        // Format sub-nodes as iterations with preserved details
         if (node.SubText != null)
         {
             for (int i = 0; i < node.SubText.Count; i++)
@@ -43,7 +45,10 @@ public class NodeTypeFormatters
                 var iterationPrefix = _treeFormatter.CreateNodePrefix(childPrefix, isLastIteration);
                 var subNode = node.SubText[i];
                 
-                sb.AppendLine(_treeFormatter.FormatTreeNode(iterationPrefix, $"Iteration {i + 1}: {subNode.Text}"));
+                // Preserve calculation details for this iteration
+                var detailedValue = _detailFormatter.PreserveIterationDetails(subNode.Text, fullBreakdown);
+                
+                sb.AppendLine(_treeFormatter.FormatTreeNode(iterationPrefix, $"Iteration {i + 1}: {detailedValue}"));
             }
         }
     }
@@ -73,7 +78,9 @@ public class NodeTypeFormatters
         var diceInfo = _textParser.ExtractDiceRollInfo(node.Text, fullBreakdown);
         if (!string.IsNullOrEmpty(diceInfo))
         {
-            sb.AppendLine(_treeFormatter.FormatTreeNode(currentPrefix, diceInfo));
+            // Further enhance with preserved exploding dice details
+            var enhancedDiceInfo = _detailFormatter.PreserveExplodingDiceDetails(node.Text, fullBreakdown);
+            sb.AppendLine(_treeFormatter.FormatTreeNode(currentPrefix, enhancedDiceInfo));
         }
         else
         {

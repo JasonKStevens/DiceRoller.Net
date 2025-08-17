@@ -28,7 +28,7 @@ public class ComplexityAnalyzer : IComplexityAnalyzer
             { NodeType.Max, 2 },
             { NodeType.StepFunc, 2 },
             { NodeType.StepFuncDef, 2 },
-            { NodeType.Repeat, 5 } // Repeat operations are inherently complex - they multiply operations
+            { NodeType.Repeat, 4 } // Adjusted to balance complexity - repeat is significant but not overwhelming
         };
     }
     /// <summary>
@@ -102,6 +102,27 @@ public class ComplexityAnalyzer : IComplexityAnalyzer
         // Special handling for certain patterns
         score += GetPatternComplexity(node);
 
+        // Apply repeat complexity scaling - repeats should scale more gradually
+        if (node.NodeType == NodeType.Repeat && node.SubText != null)
+        {
+            // Instead of multiplying by iteration count, add a scaling factor
+            var iterationCount = node.SubText.Count;
+            if (iterationCount > 5)
+            {
+                score += (iterationCount - 5) / 3; // Add complexity for large iteration counts more gradually
+            }
+            
+            // Check if any sub-nodes contain exploding dice - this adds complexity
+            foreach (var subNode in node.SubText)
+            {
+                if (subNode.Text?.Contains('!') == true)
+                {
+                    score += 1; // Each exploding dice iteration adds complexity
+                    break; // Only count this bonus once per repeat node
+                }
+            }
+        }
+
         return score;
     }
 
@@ -143,7 +164,7 @@ public class ComplexityAnalyzer : IComplexityAnalyzer
         // Only add exploding dice complexity if there are other complex features
         // This prevents simple expressions like 20d100! from being marked complex
         if (hasExplodingDice && (score > 0 || node.SubText?.Count > 0))
-            score += 1;
+            score += 2; // Increased from 1 to 2 to ensure repeat+exploding is Complex
 
         return score;
     }

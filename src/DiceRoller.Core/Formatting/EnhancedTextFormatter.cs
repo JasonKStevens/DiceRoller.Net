@@ -11,12 +11,14 @@ public class EnhancedTextFormatter : IAdaptiveBreakdownFormatter
     private readonly TreeStructureFormatter _treeFormatter;
     private readonly BreakdownTextParser _textParser;
     private readonly NodeTypeFormatters _nodeFormatters;
+    private readonly DetailPreservingFormatter _detailFormatter;
 
     public EnhancedTextFormatter()
     {
         _treeFormatter = new TreeStructureFormatter();
         _textParser = new BreakdownTextParser();
         _nodeFormatters = new NodeTypeFormatters(_treeFormatter, _textParser);
+        _detailFormatter = new DetailPreservingFormatter(_textParser);
         _nodeFormatters.SetFormatNodeCallback(FormatNode);
     }
 
@@ -38,7 +40,15 @@ public class EnhancedTextFormatter : IAdaptiveBreakdownFormatter
         // Format the tree structure
         FormatNode(typedResult, sb, "", true, breakdown);
         
-        return sb.ToString().TrimEnd();
+        var result = sb.ToString().TrimEnd();
+        
+        // Apply smart truncation if needed to stay within Discord limits
+        if (_detailFormatter.NeedsTruncation(result))
+        {
+            result = _detailFormatter.CreateSmartTruncation(result);
+        }
+        
+        return result;
     }
 
     /// <summary>
