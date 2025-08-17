@@ -23,12 +23,10 @@ namespace DiscordRollerBot.Services
             IServiceProvider serviceProvider,
             ILogger<SlashCommandRegistrationService> logger)
         {
-            Console.WriteLine("SlashCommandRegistrationService CONSTRUCTOR called");
             _discordClient = discordClient;
             _serviceProvider = serviceProvider;
             _logger = logger;
             _logger.LogInformation("SlashCommandRegistrationService constructor called");
-            Console.WriteLine("SlashCommandRegistrationService CONSTRUCTOR completed");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

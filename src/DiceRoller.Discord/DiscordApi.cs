@@ -29,14 +29,12 @@ namespace DiscordRollerBot
 
         public DiscordApi(DiscordClient client, DiscordApiConfiguration config, IEnumerable<ICommandProcessor> commandProcessors, IUserSettings userSettings, InteractionHandler interactionHandler, ILogger<DiscordApi> logger = null)
         {
-            Console.WriteLine("DiscordApi CONSTRUCTOR called");
             _client = client;
             _config = config;
             _commandProcessors = commandProcessors;
             _userSettings = userSettings;
             _interactionHandler = interactionHandler;
             _logger = logger ?? NullLogger<DiscordApi>.Instance;
-            Console.WriteLine("DiscordApi CONSTRUCTOR completed");
         }
 
         public DiscordApiStatus State { get; private set; }
@@ -64,15 +62,25 @@ namespace DiscordRollerBot
                 _logger.LogInformation("Button interactions enabled - ComponentInteractionCreated handler attached");
             }
 
+            // Add Ready event handler for debugging
+            _client.Ready += async (sender, e) =>
+            {
+                Console.WriteLine($"Discord bot is ready! Username: {sender.CurrentUser.Username}");
+                _logger.LogInformation($"Discord bot is ready! Username: {sender.CurrentUser.Username}");
+                await Task.CompletedTask;
+            };
+            
             _logger.LogInformation("Connecting to Discord...");
             try
             {
                 await _client.ConnectAsync();
+                Console.WriteLine($"Connected to Discord! Waiting for Ready event...");
                 _logger.LogInformation($"Connected successfully! Bot user: {_client.CurrentUser?.Username}#{_client.CurrentUser?.Discriminator}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to connect to Discord");
+                Console.WriteLine($"Failed to connect: {ex.Message}");
                 throw;
             }
 

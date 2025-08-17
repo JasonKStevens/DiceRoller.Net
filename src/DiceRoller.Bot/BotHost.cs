@@ -21,24 +21,25 @@ namespace DiceRollerCmd
 
         public BotHost(ILogger<BotHost> logger, IHostApplicationLifetime appLifetime, IDiscordApi discord)
         {
-            Console.WriteLine("BotHost CONSTRUCTOR called");
             _logger = logger;
             _discordInterface = discord;
             _logger.LogInformation("BotHost constructor called - Discord interface injected");
-            Console.WriteLine("BotHost CONSTRUCTOR completed");
         }
 
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            Console.WriteLine("BotHost.StartAsync called - Starting Discord interface...");
             _logger.LogInformation("BotHost.StartAsync called - Starting Discord interface...");
             try
             {
-                await _discordInterface.Start();
+                var result = await _discordInterface.Start();
+                Console.WriteLine($"Discord interface started: {result}");
                 _logger.LogInformation("BotHost.StartAsync completed successfully");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"ERROR starting Discord: {ex.Message}");
                 _logger.LogError(ex, "Failed to start Discord interface");
                 throw;
             }

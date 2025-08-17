@@ -1,7 +1,14 @@
 # DiceRoller.Net
 [![Build Status](https://dev.azure.com/jasonkstevens/PuzzleBox/_apis/build/status/JasonKStevens.DiceRoller.Net?branchName=main)](https://dev.azure.com/jasonkstevens/PuzzleBox/_build/latest?definitionId=9&branchName=main)
 
-A comprehensive .NET 8.0 dice rolling system built on the [Irony](https://github.com/IronyProject/Irony) language kit for parsing dice notation expressions. The solution provides a Discord bot interface for rolling dice with support for complex expressions, game-specific systems, and an advanced Progressive Disclosure formatting system.
+A comprehensive .NET 8.0 dice rolling system built on the [Irony](https://github.com/IronyProject/Irony) language kit for parsing dice notation expressions. The solution provides a Discord bot interface for rolling dice with support for complex expressions, game-specific systems, plugins, and an advanced Progressive Disclosure formatting system.
+
+## Recent Updates (January 2025)
+- ✅ **Fixed circular dependency** in DI container between `IGameSystemRouter` and `IDiceExpressionEvaluator`
+- ✅ **Auto-loads system environment variables** for bot token when VS Code terminal doesn't inherit them
+- ✅ **Plugin system fully integrated** with function registry and game system router
+- ✅ **Cleaned up debug output** and removed test projects from root
+- ✅ **Bot successfully connects** to Discord and registers slash commands
 
 ## Project Structure
 
@@ -33,7 +40,7 @@ The foundational library containing all dice rolling logic, expression parsing, 
 Discord bot application with hosted service architecture.
 - Multiple command processors (roll, party, settings, game-specific)
 - User settings and alias management
-- Configuration via appsettings.json
+- **Enhanced configuration system** with environment-specific files, validation, and Options pattern
 - Integration with Progressive Disclosure formatting
 
 #### DiceRoller.Discord
@@ -219,11 +226,38 @@ For detailed architecture information, see [ARCHITECTURE.md](ARCHITECTURE.md).
 dotnet build src/DiceRoller.sln
 ```
 
+### Configuration
+
+The bot features a comprehensive configuration system with environment-specific settings, validation, and flexible configuration sources.
+
+#### Quick Setup
+1. **Configure Discord bot token**:
+   ```bash
+   # Environment variable (recommended)
+   export DICEROLLER_Bot__Token=your-discord-bot-token
+   
+   # Or in appsettings.json
+   "Bot": { "Token": "your-discord-bot-token" }
+   ```
+
+2. **Set environment** (optional):
+   ```bash
+   export ASPNETCORE_ENVIRONMENT=Development  # or Production, Docker
+   ```
+
+#### Configuration Features
+- **Multi-environment support** with `appsettings.{Environment}.json` files
+- **Environment variable support** with `DICEROLLER_` prefix
+- **Backward compatibility** with legacy `BotConfig_` variables
+- **Strong typing and validation** with data annotations
+- **Configurable logging, plugins, and security settings**
+
+For complete configuration documentation, see **[CONFIGURATION.md](CONFIGURATION.md)**.
+
 ### Running the Applications
 
 #### Discord Bot
-1. Configure your Discord bot token in `src/DiceRoller.Bot/appsettings.json`
-2. Run: `dotnet run --project src/DiceRoller.Bot`
+Run: `dotnet run --project src/DiceRoller.Bot`
 
 The bot uses **slash commands** exclusively:
 - Type `/roll` then select the "dice" parameter
@@ -373,6 +407,11 @@ public void NewFeature_ValidInputs_ReturnsExpectedResults(string input, int expe
   - Created PluginIntegrationService bridging plugins to core systems
   - Added Discord commands for plugin management
   - Example CallOfCthulhu plugin demonstrates full integration
+- **Configuration Enhancement** ✅ COMPLETED
+  - Strongly-typed configuration with validation
+  - Environment-specific appsettings files (Development, Production, Docker)
+  - Options pattern with IOptions<T> dependency injection
+  - Backward compatibility with legacy configuration
 
 ### Plugin System Features
 - **Runtime Plugin Management**: Monitor and reload plugins via Discord commands

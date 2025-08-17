@@ -4,6 +4,244 @@
 
 DiceRoller.Net is a Discord-only dice rolling bot built on .NET 8.0 using the Irony language kit for parsing dice notation expressions. The system features a sophisticated Progressive Disclosure system that adapts output formatting based on expression complexity.
 
+## Core Architecture Diagrams
+
+### Dice Expression Processing Flow
+
+```mermaid
+classDiagram
+    class IDiceExpressionParser {
+        <<interface>>
+        +Parse(expression: string) ParseResult
+    }
+    
+    class IDiceExpressionEvaluator {
+        <<interface>>
+        +Evaluate(parseTree: ParseTree) DiceResultNode
+    }
+    
+    class DiceExpressionParser {
+        -parser: Parser
+        -grammar: ExpressionGrammar
+        +Parse(expression: string) ParseResult
+    }
+    
+    class DiceExpressionEvaluator {
+        -visitor: DiceRollVisitor
+        -parser: IDiceExpressionParser
+        +Evaluate(parseTree: ParseTree) DiceResultNode
+    }
+    
+    class DiceRollVisitor {
+        -randomNumberGenerator: IRandomNumberGenerator
+        -functionRegistry: IFunctionRegistry
+        -gameSystemRouter: IGameSystemRouter
+        +Visit(node: ParseTreeNode) DiceResultNode
+    }
+    
+    class DiceRollEvaluator {
+        -parser: IDiceExpressionParser
+        -evaluator: IDiceExpressionEvaluator
+        -visitor: DiceRollVisitor
+        +EvaluateExpression(expression: string) DiceResultNode
+    }
+    
+    class ExpressionGrammar {
+        +NonTerminals
+        +Terminals
+        +Root: BnfExpression
+    }
+    
+    class DiceResultNode {
+        +Value: float
+        +Breakdown: string
+        +Result: TypedResult
+    }
+    
+    IDiceExpressionParser <|.. DiceExpressionParser
+    IDiceExpressionEvaluator <|.. DiceExpressionEvaluator
+    DiceExpressionParser --> ExpressionGrammar
+    DiceExpressionEvaluator --> DiceRollVisitor
+    DiceExpressionEvaluator --> IDiceExpressionParser
+    DiceRollEvaluator --> IDiceExpressionParser
+    DiceRollEvaluator --> IDiceExpressionEvaluator
+    DiceRollEvaluator --> DiceRollVisitor
+    DiceRollVisitor --> DiceResultNode : creates
+```
+
+### Function Registry & Game System Router
+
+```mermaid
+classDiagram
+    class IFunctionRegistry {
+        <<interface>>
+        +RegisterFunction(name: string, function: IDiceFunction)
+        +UnregisterFunction(name: string) bool
+        +ExecuteFunction(name: string, args: List~DiceResultNode~) DiceResultNode
+        +HasFunction(name: string) bool
+    }
+    
+    class IDiceFunction {
+        <<interface>>
+        +Name: string
+        +Execute(context: IFunctionContext, args: List~DiceResultNode~) DiceResultNode
+        +ValidateArguments(args: List~DiceResultNode~) bool
+    }
+    
+    class FunctionRegistry {
+        -functions: Dictionary~string, IDiceFunction~
+        +RegisterFunction(name: string, function: IDiceFunction)
+        +ExecuteFunction(name: string, args: List~DiceResultNode~) DiceResultNode
+    }
+    
+    class IGameSystemRouter {
+        <<interface>>
+        +RegisterSystem(system: IGameSystem)
+        +CanHandle(commandType: string) bool
+        +RouteCommand(commandType: string, parameters: string[], userId: string) DiceResultNode
+    }
+    
+    class GameSystemRouter {
+        -systems: List~IGameSystem~
+        +RegisterSystem(system: IGameSystem)
+        +RouteCommand(commandType: string, parameters: string[], userId: string) DiceResultNode
+    }
+    
+    class IGameSystem {
+        <<interface>>
+        +Name: string
+        +CanHandle(commandType: string) bool
+        +ProcessCommand(commandType: string, parameters: object[], userId: string) DiceResultNode
+    }
+    
+    IFunctionRegistry <|.. FunctionRegistry
+    IGameSystemRouter <|.. GameSystemRouter
+    FunctionRegistry --> IDiceFunction : manages
+    GameSystemRouter --> IGameSystem : routes to
+    DiceRollVisitor --> IFunctionRegistry : uses
+    DiceRollVisitor --> IGameSystemRouter : uses
+```
+
+### Discord Integration & Command Processing
+
+```mermaid
+classDiagram
+    class IDiscordApi {
+        <<interface>>
+        +Start() Task~bool~
+        +Stop() Task
+        +State: DiscordApiStatus
+    }
+    
+    class DiscordApi {
+        -client: DiscordClient
+        -config: DiscordApiConfiguration
+        -commandProcessors: IEnumerable~ICommandProcessor~
+        -interactionHandler: InteractionHandler
+        +Start() Task~bool~
+        +HandleTypedMessage(sender: DiscordClient, e: MessageCreateEventArgs)
+    }
+    
+    class ICommandProcessor {
+        <<interface>>
+        +Prefix: string
+        +ProcessTyped(userId: string, commandText: string) (bool, TypedResult)
+    }
+    
+    class RollCommandProcessor {
+        -evaluator: DiceRollEvaluator
+        -aliases: IUserAliases
+        +Prefix: string
+        +ProcessTyped(userId: string, commandText: string) (bool, TypedResult)
+    }
+    
+    class SlashCommandRegistrationService {
+        -discordClient: DiscordClient
+        -slashCommands: SlashCommandsExtension
+        +StartAsync(cancellationToken: CancellationToken) Task
+        +RegisterCommands()
+    }
+    
+    class RollSlashCommand {
+        -commandProcessors: IEnumerable~ICommandProcessor~
+        -adaptiveFormatterManager: AdaptiveFormatterManager
+        +RollCommand(ctx: InteractionContext, expression: string)
+    }
+    
+    class BotHost {
+        -discordInterface: IDiscordApi
+        +StartAsync(cancellationToken: CancellationToken) Task
+        +StopAsync(cancellationToken: CancellationToken) Task
+    }
+    
+    IDiscordApi <|.. DiscordApi
+    ICommandProcessor <|.. RollCommandProcessor
+    ICommandProcessor <|.. DQCommandProcessor
+    ICommandProcessor <|.. PluginCommandProcessor
+    DiscordApi --> ICommandProcessor : uses
+    DiscordApi --> InteractionHandler
+    BotHost --> IDiscordApi : manages
+    SlashCommandRegistrationService --> DiscordClient
+    RollSlashCommand --> ICommandProcessor : delegates to
+```
+
+### Plugin Integration Architecture
+
+```mermaid
+classDiagram
+    class IPluginIntegrationService {
+        <<interface>>
+        +InitializeAsync() Task
+        +GetLoadedPlugins() IEnumerable~IPlugin~
+        +ReloadPlugin(pluginName: string) Task~bool~
+    }
+    
+    class PluginIntegrationService {
+        -functionRegistry: IFunctionRegistry
+        -gameSystemRouter: IGameSystemRouter
+        -pluginManager: PluginManager
+        -functionAdapters: Dictionary~string, PluginFunctionAdapter~
+        -gameSystemAdapters: Dictionary~string, PluginGameSystemAdapter~
+        +InitializeAsync() Task
+        +IntegratePlugin(plugin: IPlugin)
+    }
+    
+    class PluginManager {
+        -plugins: List~IPlugin~
+        -pluginLoader: PluginLoader
+        +LoadPluginsAsync(directory: string) Task
+        +GetPlugin(name: string) IPlugin
+    }
+    
+    class IPlugin {
+        <<interface>>
+        +Metadata: PluginMetadata
+        +Initialize(context: IPluginContext) Task
+        +Shutdown() Task
+    }
+    
+    class PluginFunctionAdapter {
+        -plugin: IPlugin
+        -originalFunction: object
+        +Execute(context: IFunctionContext, args: List~DiceResultNode~) DiceResultNode
+    }
+    
+    class PluginGameSystemAdapter {
+        -plugin: IPlugin
+        -gameSystem: IGameSystem
+        +CanHandle(commandType: string) bool
+        +ProcessCommand(commandType: string, parameters: object[], userId: string) DiceResultNode
+    }
+    
+    IPluginIntegrationService <|.. PluginIntegrationService
+    PluginIntegrationService --> IFunctionRegistry : registers functions
+    PluginIntegrationService --> IGameSystemRouter : registers systems
+    PluginIntegrationService --> PluginManager : manages plugins
+    PluginIntegrationService --> PluginFunctionAdapter : creates
+    PluginIntegrationService --> PluginGameSystemAdapter : creates
+    PluginManager --> IPlugin : loads and manages
+```
+
 ## Project Structure (8 Core Projects)
 
 ### 1. **DiceRoller.Core** - Core Library
@@ -340,6 +578,22 @@ The router pattern was implemented with zero breaking changes:
 2. **Added Router Layer**: New router sits between visitor and game systems
 3. **Graceful Fallback**: If router fails, falls back to original implementation
 4. **Incremental Migration**: Game systems can be moved to router over time
+
+## Important Architecture Decisions
+
+### Circular Dependency Resolution (January 2025)
+
+A circular dependency existed between `IGameSystemRouter` and `IDiceExpressionEvaluator`:
+- `IGameSystemRouter` factory required `IDiceExpressionEvaluator` to process game commands
+- `DiceExpressionEvaluator` constructor optionally accepted `IGameSystemRouter` for inline game commands
+
+**Solution**: The dependency was broken by passing `null` for the `IGameSystemRouter` parameter in `DiceExpressionEvaluator`. This works because:
+1. Game commands are primarily processed through dedicated `ICommandProcessor` implementations
+2. Each command processor has direct access to its game system
+3. The router is mainly used for plugin-based game systems
+4. Inline game commands within dice expressions are not a primary use case
+
+**Impact**: No functionality loss as the two systems (dice evaluation and game commands) operate through separate paths in the architecture.
 
 ## Design Patterns
 
