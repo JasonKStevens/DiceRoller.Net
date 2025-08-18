@@ -4,6 +4,8 @@
 A comprehensive .NET 8.0 dice rolling system built on the [Irony](https://github.com/IronyProject/Irony) language kit for parsing dice notation expressions. The solution provides a Discord bot interface for rolling dice with support for complex expressions, game-specific systems, plugins, and an advanced Progressive Disclosure formatting system.
 
 ## Recent Updates (January 2025)
+- ✅ **Fixed prefix commands** - Enabled `!roll` commands in production configuration
+- ✅ **Improved negative number display** - Uses `:no_entry:` emoji for clear negative indicators
 - ✅ **Fixed circular dependency** in DI container between `IGameSystemRouter` and `IDiceExpressionEvaluator`
 - ✅ **Auto-loads system environment variables** for bot token when VS Code terminal doesn't inherit them
 - ✅ **Plugin system fully integrated** with function registry and game system router
@@ -27,6 +29,7 @@ The foundational library containing all dice rolling logic, expression parsing, 
   - `DiscordFormatter.cs` - Discord-specific formatting with spoilers, code blocks, emojis
   - `AdaptiveFormatterManager.cs` - Selects formatter based on expression complexity
   - `ComplexityAnalyzer.cs` - Analyzes expression complexity with configurable thresholds
+  - `CompactFormatter.cs` - Optimized compact formatting for Discord's character limits
   - `EnhancedTextFormatter.cs` - Hierarchical tree formatting for complex expressions
   - `TreeStructureFormatter.cs` - Unicode tree symbols (├─, └─, │) for structure display
   - `Core/FormattedResult.cs` - Result formatting structure

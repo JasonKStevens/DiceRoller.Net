@@ -25,7 +25,7 @@ The application configuration is organized into logical sections:
     "Token": "your-discord-bot-token",
     "CommandPrefix": "!roll",
     "EnableSlashCommands": true,
-    "EnablePrefixCommands": false,
+    "EnablePrefixCommands": true,
     "EnableButtonInteractions": true,
     "DiscordTimeoutSeconds": 30,
     "UseGlobalCommands": true,
@@ -167,7 +167,7 @@ Controls Discord bot connection and basic behavior:
     "Token": "your-discord-bot-token",           // Required: Discord bot token
     "CommandPrefix": "!roll",                    // Legacy text command prefix
     "EnableSlashCommands": true,                 // Enable slash commands (recommended)
-    "EnablePrefixCommands": false,               // Enable text commands (deprecated)
+    "EnablePrefixCommands": true,                // Enable text commands (!roll)
     "EnableButtonInteractions": true,            // Enable interactive buttons
     "DiscordTimeoutSeconds": 30,                // Discord API timeout
     "UseGlobalCommands": true,                   // Global vs guild-specific commands
@@ -349,7 +349,7 @@ If you're upgrading from the old configuration system:
     "Token": "your-token",
     "CommandPrefix": "!roll",
     "EnableSlashCommands": true,
-    "EnablePrefixCommands": false,
+    "EnablePrefixCommands": true,
     "EnableButtonInteractions": true,
     "DiscordTimeoutSeconds": 30,
     "UseGlobalCommands": true,
