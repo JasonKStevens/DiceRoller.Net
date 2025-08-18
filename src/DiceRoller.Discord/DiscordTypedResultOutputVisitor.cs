@@ -19,9 +19,10 @@ namespace DiscordRollerBot
 
         private string Emotify(float value)
         {
-            return value.ToString()
-                //                            .Replace("-", ":traffic_light:")
-                .Replace("-", "**--** ")
+            bool isNegative = value < 0;
+            string absValueStr = Math.Abs(value).ToString();
+            
+            string emojiStr = absValueStr
                 .Replace("0", ":zero:")
                 .Replace("1", ":one:")
                 .Replace("2", ":two:")
@@ -32,6 +33,15 @@ namespace DiscordRollerBot
                 .Replace("7", ":seven:")
                 .Replace("8", ":eight:")
                 .Replace("9", ":nine:");
+            
+            if (isNegative)
+            {
+                // Use no_entry emoji - red circle with line through it
+                // Clear negative indicator that matches the visual style of number emojis
+                return ":no_entry: " + emojiStr;
+            }
+            
+            return emojiStr;
         }
 
         public string Visit(TypedResult result, int depth)
