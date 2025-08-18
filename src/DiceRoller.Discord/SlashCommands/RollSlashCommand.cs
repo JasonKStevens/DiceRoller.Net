@@ -2,6 +2,7 @@ using DiceRoller;
 using DiceRoller.Core.Parser;
 using DiceRoller.Core.Formatting;
 using DiceRoller.Core.Formatting.Core;
+using DiceRoller.Core.Services.Help;
 using DiceRoller.Discord;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -20,6 +21,7 @@ namespace DiscordRollerBot.SlashCommands
         private readonly IUserSettings _userSettings;
         private readonly IResultNodeConverter _resultNodeConverter;
         private readonly AdaptiveFormatterManager _adaptiveFormatterManager;
+        private readonly ICommandHelpService _helpService;
         private readonly ILogger<RollSlashCommand> _logger;
 
         public RollSlashCommand(
@@ -27,23 +29,49 @@ namespace DiscordRollerBot.SlashCommands
             IUserSettings userSettings, 
             IResultNodeConverter resultNodeConverter,
             AdaptiveFormatterManager adaptiveFormatterManager,
+            ICommandHelpService helpService,
             ILogger<RollSlashCommand> logger)
         {
             _commandProcessors = commandProcessors;
             _userSettings = userSettings;
             _resultNodeConverter = resultNodeConverter;
             _adaptiveFormatterManager = adaptiveFormatterManager;
+            _helpService = helpService;
             _logger = logger;
         }
 
         [SlashCommand("roll", "Roll dice with an expression")]
         public async Task RollCommand(InteractionContext ctx,
             [Autocomplete(typeof(DiceExpressionAutocompleteProvider))]
-            [Option("dice", "e.g., d20, 3d6+2, 2d10")] string expression,
+            [Option("d", "Dice expression (e.g., d20, 3d6+2, 2d10) or 'help' for usage")] string expression = "",
             [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false,
             [Option("format", "Choose output format: auto, terse, standard, detailed")] string format = "auto")
         {
             _logger.LogInformation($"=== RollCommand invoked by {ctx.User.Username} with expression: {expression} ===");
+            
+            // Handle help request first
+            if (expression?.Trim().Equals("help", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                var helpContent = _helpService.GetCommandHelp("roll");
+                var truncatedHelp = CommandHelpService.TruncateForDiscord(helpContent);
+                
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder()
+                        .WithContent(truncatedHelp)
+                        .AsEphemeral(true));
+                return;
+            }
+
+            // Validate expression is provided when not requesting help
+            if (string.IsNullOrWhiteSpace(expression))
+            {
+                var basicHelp = "Please provide a dice expression. Use `/roll d:help` for detailed help.\n\n**Examples:**\n• `/roll d:d20`\n• `/roll d:3d6+5`\n• `/roll d:backfire`";
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder()
+                        .WithContent(basicHelp)
+                        .AsEphemeral(true));
+                return;
+            }
             
             try
             {
@@ -185,34 +213,14 @@ namespace DiscordRollerBot.SlashCommands
         [SlashCommand("rollhelp", "Get help for dice rolling commands")]
         public async Task RollHelpCommand(InteractionContext ctx)
         {
-            var helpText = @"**Dice Rolling Help**
+            // Show the comprehensive dice notation help
+            string content = _helpService.GetCommandHelp("notation");
 
-**Basic Dice Expressions:**
-• `d20` - Roll a 20-sided die
-• `3d6` - Roll three 6-sided dice
-• `2d10+5` - Roll two 10-sided dice and add 5
-• `d100` - Roll percentile dice
-
-**Special Commands:**
-• `backfire` - Roll on backfire table
-• `injury` or `specgrev` - Roll for grievous injury
-• `fear` - Roll on fear table
-• `speed` - Roll on speed table
-• `hitloc [bodytype]` - Roll hit location (humanoid_mid, quadruped_mid, etc.)
-
-**Aliases:**
-• `addalias <name> <expression>` - Create a custom alias
-• `removealias <name>` - Remove an alias
-• `listalias` - List your aliases
-
-**Examples:**
-• `/roll expression:d20+5`
-• `/roll expression:3d6`
-• `/roll expression:backfire`";
+            var truncatedContent = CommandHelpService.TruncateForDiscord(content);
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .WithContent(helpText)
+                    .WithContent(truncatedContent)
                     .AsEphemeral(true));
         }
 
@@ -391,6 +399,7 @@ namespace DiscordRollerBot.SlashCommands
                 // Common dice expressions
                 var commonExpressions = new[]
                 {
+                    "help", // Add help as first suggestion
                     "d4", "d6", "d8", "d10", "d12", "d20", "d100",
                     "2d6", "3d6", "4d6", "2d8", "2d10", "2d20",
                     "3d6+3", "d20+5", "2d8+2", "d10+1",
@@ -414,6 +423,7 @@ namespace DiscordRollerBot.SlashCommands
             {
                 choices.AddRange(new[]
                 {
+                    new DiscordAutoCompleteChoice("help", "help"),
                     new DiscordAutoCompleteChoice("d20", "d20"),
                     new DiscordAutoCompleteChoice("d100", "d100"),
                     new DiscordAutoCompleteChoice("3d6", "3d6"),

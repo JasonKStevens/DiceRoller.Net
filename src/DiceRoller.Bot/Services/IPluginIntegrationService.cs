@@ -81,6 +81,20 @@ namespace DiceRoller.Bot.Services
         /// Check if the service is properly initialized
         /// </summary>
         bool IsInitialized { get; }
+
+        /// <summary>
+        /// Register help content for a plugin command
+        /// </summary>
+        /// <param name="commandName">Command name to register help for</param>
+        /// <param name="helpContent">Help content formatted for Discord</param>
+        /// <param name="pluginId">Plugin ID registering the help</param>
+        void RegisterPluginHelp(string commandName, string helpContent, string pluginId);
+
+        /// <summary>
+        /// Unregister all help content for a plugin
+        /// </summary>
+        /// <param name="pluginId">Plugin ID to unregister help for</param>
+        void UnregisterPluginHelp(string pluginId);
     }
 
     /// <summary>

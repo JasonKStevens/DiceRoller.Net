@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using DiceRoller.Core.Abstractions;
 using DiceRoller.Core.Functions;
 using DiceRoller.Core.Parser;
+using DiceRoller.Core.Services.Help;
 using DiceRoller.Plugins.Infrastructure.Core;
 using DiceRoller.Plugins.Infrastructure.Manager;
 using Irony.Parsing;
@@ -26,6 +27,7 @@ namespace DiceRoller.Bot.Services
         private readonly IConfiguration _configuration;
         private readonly IFunctionRegistry _functionRegistry;
         private readonly IGameSystemRouter _gameSystemRouter;
+        private readonly ICommandHelpService _helpService;
         private readonly PluginManager _pluginManager;
         
         private readonly Dictionary<string, PluginFunctionAdapter> _functionAdapters = new();
@@ -39,6 +41,7 @@ namespace DiceRoller.Bot.Services
             IConfiguration configuration,
             IFunctionRegistry functionRegistry,
             IGameSystemRouter gameSystemRouter,
+            ICommandHelpService helpService,
             PluginManager pluginManager)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -46,6 +49,7 @@ namespace DiceRoller.Bot.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _functionRegistry = functionRegistry ?? throw new ArgumentNullException(nameof(functionRegistry));
             _gameSystemRouter = gameSystemRouter ?? throw new ArgumentNullException(nameof(gameSystemRouter));
+            _helpService = helpService ?? throw new ArgumentNullException(nameof(helpService));
             _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
 
             // Subscribe to plugin manager events
@@ -407,6 +411,9 @@ namespace DiceRoller.Bot.Services
                 _functionAdapters.Remove(key);
             }
 
+            // Unregister help content
+            UnregisterPluginHelp(pluginId);
+
             await Task.CompletedTask;
         }
 
@@ -449,6 +456,55 @@ namespace DiceRoller.Bot.Services
                     _logger.LogError(ex, "Error unregistering plugin integrations for {PluginId}", e.PluginId);
                 }
             });
+        }
+
+        /// <inheritdoc/>
+        public void RegisterPluginHelp(string commandName, string helpContent, string pluginId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(commandName))
+                {
+                    throw new ArgumentException("Command name cannot be null or empty", nameof(commandName));
+                }
+
+                if (string.IsNullOrWhiteSpace(helpContent))
+                {
+                    throw new ArgumentException("Help content cannot be null or empty", nameof(helpContent));
+                }
+
+                if (string.IsNullOrWhiteSpace(pluginId))
+                {
+                    throw new ArgumentException("Plugin ID cannot be null or empty", nameof(pluginId));
+                }
+
+                _helpService.RegisterPluginHelp(commandName, helpContent, pluginId);
+                _logger.LogDebug("Registered help content for command '{CommandName}' from plugin '{PluginId}'", commandName, pluginId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error registering plugin help for command '{CommandName}' from plugin '{PluginId}'", commandName, pluginId);
+                throw;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void UnregisterPluginHelp(string pluginId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(pluginId))
+                {
+                    return;
+                }
+
+                _helpService.UnregisterPluginHelp(pluginId);
+                _logger.LogDebug("Unregistered all help content for plugin '{PluginId}'", pluginId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unregistering plugin help for plugin '{PluginId}'", pluginId);
+            }
         }
 
         public void Dispose()
@@ -610,6 +666,7 @@ namespace DiceRoller.Bot.Services
                 return TypedResult.NewSimpleResult(NodeType.Text, $"Error: {ex.Message}");
             }
         }
+
 
         private TypedResult ConvertToTypedResult(GameSystemCommandResult result)
         {

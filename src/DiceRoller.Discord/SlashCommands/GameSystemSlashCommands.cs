@@ -1,5 +1,6 @@
 using DiceRoller;
 using DiceRoller.Core.Parser;
+using DiceRoller.Core.Services.Help;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -15,64 +16,106 @@ namespace DiscordRollerBot.SlashCommands
     {
         private readonly IEnumerable<ICommandProcessor> _commandProcessors;
         private readonly IUserSettings _userSettings;
+        private readonly ICommandHelpService _helpService;
         private readonly ILogger<GameSystemSlashCommands> _logger;
 
-        public GameSystemSlashCommands(IEnumerable<ICommandProcessor> commandProcessors, IUserSettings userSettings, ILogger<GameSystemSlashCommands> logger)
+        public GameSystemSlashCommands(IEnumerable<ICommandProcessor> commandProcessors, IUserSettings userSettings, ICommandHelpService helpService, ILogger<GameSystemSlashCommands> logger)
         {
             _commandProcessors = commandProcessors;
             _userSettings = userSettings;
+            _helpService = helpService;
             _logger = logger;
         }
 
         [SlashCommand("dq", "DragonQuest system commands")]
         public async Task DragonQuestCommand(InteractionContext ctx,
             [Autocomplete(typeof(DragonQuestAutocompleteProvider))]
-            [Option("command", "DragonQuest command (backfire, injury, fear, etc.)")] string command,
+            [Option("command", "DragonQuest command (backfire, injury, fear, etc.)")] string command = "",
             [Option("modifier", "Optional modifier or additional parameter")] string modifier = "",
-            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false)
+            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false,
+            [Option("help", "Show help for this command")] bool help = false)
         {
-            await ProcessGameSystemCommand(ctx, "!dq", command, modifier, ephemeral);
+            await ProcessGameSystemCommand(ctx, "!dq", command, modifier, ephemeral, help, "dq");
         }
 
         [SlashCommand("hero", "Heroes system commands")]
         public async Task HeroesCommand(InteractionContext ctx,
             [Autocomplete(typeof(HeroesAutocompleteProvider))]
-            [Option("command", "Heroes command (speed, etc.)")] string command,
+            [Option("command", "Heroes command (speed, etc.)")] string command = "",
             [Option("modifier", "Optional modifier or additional parameter")] string modifier = "",
-            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false)
+            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false,
+            [Option("help", "Show help for this command")] bool help = false)
         {
-            await ProcessGameSystemCommand(ctx, "!hero", command, modifier, ephemeral);
+            await ProcessGameSystemCommand(ctx, "!hero", command, modifier, ephemeral, help, "heroes");
         }
 
         [SlashCommand("party", "Party management commands")]
         public async Task PartyCommand(InteractionContext ctx,
             [Autocomplete(typeof(PartyAutocompleteProvider))]
-            [Option("action", "Party action (create, join, leave, list, etc.)")] string action,
+            [Option("action", "Party action (create, join, leave, list, etc.)")] string action = "",
             [Option("parameter", "Optional parameter for the action")] string parameter = "",
-            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false)
+            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = false,
+            [Option("help", "Show help for this command")] bool help = false)
         {
-            await ProcessGameSystemCommand(ctx, "!party", action, parameter, ephemeral);
+            await ProcessGameSystemCommand(ctx, "!party", action, parameter, ephemeral, help, "party");
         }
 
         [SlashCommand("settings", "User settings management")]
         public async Task SettingsCommand(InteractionContext ctx,
             [Autocomplete(typeof(SettingsAutocompleteProvider))]
-            [Option("action", "Settings action (set, get, delete, list)")] string action,
+            [Option("action", "Settings action (set, get, delete, list)")] string action = "",
             [Option("setting", "Setting name")] string setting = "",
             [Option("value", "Setting value (for set command)")] string value = "",
-            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = true)
+            [Option("ephemeral", "Make the result visible only to you")] bool ephemeral = true,
+            [Option("help", "Show help for this command")] bool help = false)
         {
+            if (help)
+            {
+                var helpContent = _helpService.GetCommandHelp("settings");
+                var truncatedHelp = CommandHelpService.TruncateForDiscord(helpContent);
+                
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder()
+                        .WithContent(truncatedHelp)
+                        .AsEphemeral(true));
+                return;
+            }
+            
             var commandText = string.IsNullOrWhiteSpace(value) 
                 ? $"!settings {action} {setting}".Trim()
                 : $"!settings {action} {setting} {value}".Trim();
             
-            await ProcessGameSystemCommand(ctx, "!settings", $"{action} {setting} {value}".Trim(), "", ephemeral);
+            await ProcessGameSystemCommand(ctx, "!settings", $"{action} {setting} {value}".Trim(), "", ephemeral, false, "settings");
         }
 
-        private async Task ProcessGameSystemCommand(InteractionContext ctx, string prefix, string command, string modifier, bool ephemeral)
+        private async Task ProcessGameSystemCommand(InteractionContext ctx, string prefix, string command, string modifier, bool ephemeral, bool help = false, string helpCommandName = null)
         {
             try
             {
+                // Handle help request first
+                if (help && !string.IsNullOrWhiteSpace(helpCommandName))
+                {
+                    var helpContent = _helpService.GetCommandHelp(helpCommandName);
+                    var truncatedHelp = CommandHelpService.TruncateForDiscord(helpContent);
+                    
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder()
+                            .WithContent(truncatedHelp)
+                            .AsEphemeral(true));
+                    return;
+                }
+
+                // Validate command is provided when not requesting help
+                if (string.IsNullOrWhiteSpace(command) && !help)
+                {
+                    var basicHelp = $"Please provide a command. Use `help:true` for detailed help.";
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder()
+                            .WithContent(basicHelp)
+                            .AsEphemeral(true));
+                    return;
+                }
+                
                 var user = new DiscordUserInfo()
                 {
                     Id = ctx.User.Id.ToString(),
